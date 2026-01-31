@@ -14,6 +14,8 @@ struct InsomniaView: View {
     // Local UI state
     @State private var showCustomTime = false
     @State private var customMinutes: String = ""
+    @State private var showUntilTime = false
+    @State private var targetTime: Date = Date().addingTimeInterval(3600) // Default: 1 hour from now
 
     // Grid layout for buttons
     let columns = [
@@ -69,12 +71,23 @@ struct InsomniaView: View {
                     customMinutes: $customMinutes,
                     onStart: { minutes in
                         sleepTimer.start(minutes: minutes)
+                        showUntilTime = false
+                    }
+                )
+
+                // --- 5. Until Time Picker ---
+                UntilTimeInputView(
+                    showUntilTime: $showUntilTime,
+                    targetTime: $targetTime,
+                    onStart: { time in
+                        sleepTimer.start(until: time)
+                        showCustomTime = false
                     }
                 )
 
                 Spacer(minLength: Spacing.extraLarge)
 
-                // --- 5. Footer ---
+                // --- 6. Footer ---
                 if sleepTimer.isActive {
                     AppButton(icon: "bed.double.fill", title: "Allow Sleep", style: .destructive) {
                         sleepTimer.stop()
@@ -83,7 +96,7 @@ struct InsomniaView: View {
                     .padding(.bottom, Spacing.small)
                 }
 
-                // --- 6. Bottom Bar (Quit) ---
+                // --- 7. Bottom Bar (Quit) ---
                 AppButton(icon: "power", title: "Quit Insomnia") {
                     NSApplication.shared.terminate(nil)
                 }
@@ -152,7 +165,7 @@ struct CustomTimeInputView: View {
     var body: some View {
         Group {
             if showCustomTime {
-                HStack(spacing: 10) {
+                HStack(spacing: Spacing.small) {
                     HStack {
                         Image(systemName: "timer")
                         TextField("Minutes", text: $customMinutes)
@@ -186,6 +199,64 @@ struct CustomTimeInputView: View {
                     showCustomTime = true
                 }
                 .padding(.horizontal)
+            }
+        }
+    }
+}
+
+// MARK: - Until Time Input View
+
+struct UntilTimeInputView: View {
+    @Binding var showUntilTime: Bool
+    @Binding var targetTime: Date
+    let onStart: (Date) -> Void
+
+    // Minimum time is 1 minute from now, maximum is 24 hours from now
+    private var minTime: Date { Date().addingTimeInterval(60) }
+    private var maxTime: Date { Date().addingTimeInterval(24 * 60 * 60) }
+
+    var body: some View {
+        Group {
+            if showUntilTime {
+                HStack(spacing: Spacing.small) {
+                    HStack {
+                        Image(systemName: "clock.badge.checkmark")
+
+                        DatePicker(
+                            "",
+                            selection: $targetTime,
+                            in: minTime...maxTime,
+                            displayedComponents: .hourAndMinute
+                        )
+                        .labelsHidden()
+                        .datePickerStyle(.compact)
+                        .colorScheme(.dark)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, Spacing.small)
+                    .background(AppColors.backgroundOverlay)
+                    .cornerRadius(AppDimensions.cornerRadius)
+
+                    IconButton(icon: "checkmark", style: .confirm) {
+                        onStart(targetTime)
+                        showUntilTime = false
+                    }
+
+                    IconButton(icon: "xmark", style: .destructive) {
+                        showUntilTime = false
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.top, Spacing.small)
+            } else {
+                AppButton(icon: "clock.badge.checkmark", title: "Until Time") {
+                    // Reset target time to 1 hour from now when opening
+                    targetTime = Date().addingTimeInterval(3600)
+                    showUntilTime = true
+                }
+                .padding(.horizontal)
+                .padding(.top, Spacing.small)
             }
         }
     }

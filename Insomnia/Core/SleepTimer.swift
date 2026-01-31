@@ -39,6 +39,18 @@ final class SleepTimer: ObservableObject {
 
     // MARK: - Public Methods
 
+    /// Starts preventing sleep until the specified time.
+    /// - Parameter targetTime: The target time to stay awake until.
+    func start(until targetTime: Date) {
+        // Calculate seconds until target time
+        let secondsUntil = Int(targetTime.timeIntervalSince(Date()))
+        guard secondsUntil >= 60 else { return }
+        
+        // Convert to minutes (rounding up to ensure we reach the target)
+        let minutes = (secondsUntil + 59) / 60
+        start(minutes: minutes)
+    }
+
     /// Starts preventing sleep for the specified duration.
     /// - Parameter minutes: Duration in minutes. Use -1 for indefinite.
     func start(minutes: Int) {

@@ -173,7 +173,8 @@ struct InsomniaApp: App {
 
 | Method | Parameters | Description |
 |--------|------------|-------------|
-| `start(minutes:)` | `Int` (-1 for indefinite) | Starts sleep prevention |
+| `start(minutes:)` | `Int` (-1 for indefinite) | Starts sleep prevention for duration |
+| `start(until:)` | `Date` | Starts sleep prevention until specific time |
 | `stop()` | None | Stops and resets |
 
 **Published Properties:**
@@ -224,12 +225,15 @@ struct InsomniaApp: App {
 3. **StatusDisplayView** - "Staying Awake" + countdown or "System Normal"
 4. **Duration Grid** - 10 Min, 30 Min, 1 Hour, Indefinite buttons
 5. **CustomTimeInputView** - Manual minutes input
-6. **Footer** - "Allow Sleep" (when active) + "Quit Insomnia"
+6. **UntilTimeInputView** - Time picker for "keep awake until" feature
+7. **Footer** - "Allow Sleep" (when active) + "Quit Insomnia"
 
 **State:**
 - `@StateObject sleepTimer: SleepTimer`
 - `@State showCustomTime: Bool`
 - `@State customMinutes: String`
+- `@State showUntilTime: Bool`
+- `@State targetTime: Date`
 
 **Layout:**
 - Fixed width: 300pt
@@ -267,7 +271,7 @@ struct InsomniaApp: App {
 - `.confirm`: Uses `AppColors.confirmGreen`
 - `.destructive`: Uses `AppColors.destructiveGradient`
 
-**Usage:** Used in `CustomTimeInputView` for confirm/cancel actions.
+**Usage:** Used in `CustomTimeInputView` and `UntilTimeInputView` for confirm/cancel actions.
 
 ---
 
@@ -429,6 +433,17 @@ Look for an assertion with reason "Insomnia is keeping the system awake".
 AppButton(icon: "2.circle", title: "2 Hours") { sleepTimer.start(minutes: 120) }
 ```
 
+#### Using the "Until Time" Feature
+
+The app supports keeping awake until a specific time using the `start(until:)` method:
+```swift
+// Keep awake until 3:00 PM today
+let targetTime = Calendar.current.date(bySettingHour: 15, minute: 0, second: 0, of: Date())!
+sleepTimer.start(until: targetTime)
+```
+
+The UI provides a DatePicker (hour and minute) that allows selecting a time within the next 24 hours.
+
 #### Adding a New Notification
 
 1. Add identifier in `NotificationManager.swift`:
@@ -516,6 +531,7 @@ MenuBarExtra("Insomnia", systemImage: "moon.fill") { ... }
 - [x] NotificationManager with 1-minute warning
 - [x] Reusable UI components extracted
 - [x] Custom time input support
+- [x] "Until Time" picker support (keep awake until specific time)
 - [x] Centralized color constants (`AppColors`)
 - [x] Centralized spacing/layout constants (`Spacing`, `AppLayout`)
 - [x] Time formatting utility (`TimeUtil`)

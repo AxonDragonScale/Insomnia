@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct InsomniaView: View {
-    // ViewModel
-    @StateObject private var sleepTimer = SleepTimer()
+    // ViewModel (owned by InsomniaApp, passed in for menu bar icon updates)
+    @ObservedObject var sleepTimer: SleepTimer
 
     // Local UI state
     @State private var showCustomTime = false
@@ -91,7 +91,7 @@ struct InsomniaView: View {
                 .padding(.bottom, Spacing.medium)
             }
         }
-        .frame(width: AppLayout.windowWidth)  // Width is fixed, height is dynamic
+        .frame(width: AppDimensions.windowWidth)  // Width is fixed, height is dynamic
         // No .frame(height: ...) here! It will shrink to fit.
     }
 
@@ -125,7 +125,7 @@ struct StatusDisplayView: View {
                             .animation(.default, value: timeRemainingDisplay)
                     }
                 }
-                .frame(height: AppLayout.countdownHeight)
+                .frame(height: AppDimensions.countdownHeight)
             } else {
                 Text("System Normal")
                     .font(.title3)
@@ -137,7 +137,7 @@ struct StatusDisplayView: View {
                     .foregroundColor(AppColors.secondaryText)
             }
         }
-        .frame(height: AppLayout.statusAreaHeight)  // Fixed height for status area to prevent jumping
+        .frame(height: AppDimensions.statusAreaHeight)  // Fixed height for status area to prevent jumping
         .padding(.top, Spacing.medium)
     }
 }
@@ -165,7 +165,7 @@ struct CustomTimeInputView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, Spacing.small)
                     .background(AppColors.backgroundOverlay)
-                    .cornerRadius(AppLayout.cornerRadius)
+                    .cornerRadius(AppDimensions.cornerRadius)
 
                     IconButton(icon: "checkmark", style: .confirm) {
                         if let mins = Int(customMinutes), mins > 0 {
@@ -192,5 +192,5 @@ struct CustomTimeInputView: View {
 }
 
 #Preview {
-    InsomniaView()
+    InsomniaView(sleepTimer: SleepTimer())
 }

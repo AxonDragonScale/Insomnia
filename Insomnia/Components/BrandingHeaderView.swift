@@ -25,7 +25,7 @@ struct BrandingHeaderView: View {
             // Small status dot
             Circle()
                 .fill(isActive ? AppColors.activeGreen : AppColors.subtleOverlay)
-                .frame(width: AppLayout.statusDotSize, height: AppLayout.statusDotSize)
+                .frame(width: AppDimensions.statusDotSize, height: AppDimensions.statusDotSize)
                 .shadow(radius: isActive ? 2 : 0)
         }
         .padding(.horizontal)
@@ -41,5 +41,5 @@ struct BrandingHeaderView: View {
             BrandingHeaderView(isActive: false)
         }
     }
-    .frame(width: AppLayout.windowWidth)
+    .frame(width: AppDimensions.windowWidth)
 }

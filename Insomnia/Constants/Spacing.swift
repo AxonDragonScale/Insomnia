@@ -16,7 +16,7 @@ enum Spacing {
 }
 
 /// Layout dimensions for specific components
-enum AppLayout {
+enum AppDimensions {
     static let windowWidth: CGFloat = 300
     static let statusAreaHeight: CGFloat = 80
     static let countdownHeight: CGFloat = 50

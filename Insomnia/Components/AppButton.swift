@@ -44,7 +44,7 @@ struct AppButton: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, Spacing.small)
             .background(backgroundColor)
-            .cornerRadius(AppLayout.cornerRadius)
+            .cornerRadius(AppDimensions.cornerRadius)
         }
         .buttonStyle(.plain)
     }
@@ -62,5 +62,5 @@ struct AppButton: View {
         }
         .padding()
     }
-    .frame(width: AppLayout.windowWidth)
+    .frame(width: AppDimensions.windowWidth)
 }

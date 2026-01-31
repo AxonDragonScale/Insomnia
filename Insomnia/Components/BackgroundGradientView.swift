@@ -19,5 +19,5 @@ struct BackgroundGradientView: View {
 
 #Preview {
     BackgroundGradientView()
-        .frame(width: AppLayout.windowWidth, height: 400)
+        .frame(width: AppDimensions.windowWidth, height: 400)
 }

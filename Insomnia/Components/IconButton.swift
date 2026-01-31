@@ -35,10 +35,10 @@ struct IconButton: View {
         Button(action: action) {
             Image(systemName: icon)
                 .foregroundColor(.white)
-                .frame(width: AppLayout.iconButtonWidth)
+                .frame(width: AppDimensions.iconButtonWidth)
                 .padding(.vertical, Spacing.small)
                 .background(background)
-                .cornerRadius(AppLayout.cornerRadius)
+                .cornerRadius(AppDimensions.cornerRadius)
         }
         .buttonStyle(.plain)
     }
@@ -54,5 +54,5 @@ struct IconButton: View {
         }
         .padding()
     }
-    .frame(width: AppLayout.windowWidth)
+    .frame(width: AppDimensions.windowWidth)
 }

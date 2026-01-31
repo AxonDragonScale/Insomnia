@@ -17,7 +17,7 @@ struct InsomniaApp: App {
 
     var body: some Scene {
         MenuBarExtra("Insomnia", systemImage: "cup.and.saucer.fill") {
-            ContentView()
+            InsomniaView()
         }
         .menuBarExtraStyle(.window)
     }

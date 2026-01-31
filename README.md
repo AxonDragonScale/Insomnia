@@ -45,10 +45,7 @@ Insomnia/
 ├── .gitignore                    # Git ignore rules
 └── Insomnia/                     # Main source directory
     ├── InsomniaApp.swift         # App entry point
-    ├── ContentView.swift         # Main UI view
-    ├── SleepManager.swift        # IOKit power assertion logic
-    ├── SleepTimer.swift          # Timer ViewModel
-    ├── NotificationManager.swift # Local notifications
+    ├── InsomniaView.swift        # Main UI view
     ├── Insomnia.entitlements     # App sandbox entitlements
     ├── Assets.xcassets/          # App icons and colors
     │   ├── AccentColor.colorset/
@@ -58,6 +55,10 @@ Insomnia/
     │   ├── IconButton.swift      # Icon-only button component
     │   ├── BackgroundGradientView.swift
     │   └── BrandingHeaderView.swift
+    ├── Core/                     # Core business logic
+    │   ├── SleepManager.swift    # IOKit power assertion logic
+    │   ├── SleepTimer.swift      # Timer ViewModel
+    │   └── NotificationManager.swift # Local notifications
     ├── Constants/                # App-wide constants
     │   ├── AppColors.swift       # Centralized color definitions
     │   └── Spacing.swift         # Spacing and layout constants
@@ -79,9 +80,9 @@ Insomnia/
                       │
                       ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                       ContentView                           │
+│                       InsomniaView                          │
 │              (Main UI - @StateObject sleepTimer)            │
-└───────┬─────────────────────────────────────┬───────────────┘
+└───────┬─────────────────────────────────────────────────────┘
         │                                     │
         ▼                                     ▼
 ┌───────────────────┐               ┌─────────────────────────┐
@@ -120,7 +121,7 @@ Insomnia/
 struct InsomniaApp: App {
     var body: some Scene {
         MenuBarExtra("Insomnia", systemImage: "cup.and.saucer.fill") {
-            ContentView()
+            InsomniaView()
         }
         .menuBarExtraStyle(.window)
     }
@@ -213,7 +214,7 @@ struct InsomniaApp: App {
 
 ---
 
-### 5. ContentView.swift
+### 5. InsomniaView.swift
 
 **Purpose:** Main UI view rendered in the MenuBarExtra popover.
 
@@ -423,7 +424,7 @@ Look for an assertion with reason "Insomnia is keeping the system awake".
 
 #### Adding a New Duration Button
 
-1. In `ContentView.swift`, add to the `LazyVGrid`:
+1. In `InsomniaView.swift`, add to the `LazyVGrid`:
 ```swift
 AppButton(icon: "2.circle", title: "2 Hours") { sleepTimer.start(minutes: 120) }
 ```
@@ -490,10 +491,10 @@ MenuBarExtra("Insomnia", systemImage: "moon.fill") { ... }
 | To Change... | Edit File |
 |--------------|-----------|
 | Menu bar icon | `InsomniaApp.swift` |
-| Duration options | `ContentView.swift` |
-| Timer logic | `SleepTimer.swift` |
-| Power assertion type | `SleepManager.swift` |
-| Notification text/timing | `NotificationManager.swift` |
+| Duration options | `InsomniaView.swift` |
+| Timer logic | `Core/SleepTimer.swift` |
+| Power assertion type | `Core/SleepManager.swift` |
+| Notification text/timing | `Core/NotificationManager.swift` |
 | Button styling | `Components/AppButton.swift` |
 | Icon-only buttons | `Components/IconButton.swift` |
 | Background colors | `Components/BackgroundGradientView.swift` |

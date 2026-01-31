@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct InsomniaView: View {
     // ViewModel
     @StateObject private var sleepTimer = SleepTimer()
 
@@ -192,5 +192,5 @@ struct CustomTimeInputView: View {
 }
 
 #Preview {
-    ContentView()
+    InsomniaView()
 }

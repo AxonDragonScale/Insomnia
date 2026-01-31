@@ -24,73 +24,19 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             // --- Full Background Gradient ---
-            LinearGradient(
-                colors: [
-                    Color.indigo,
-                    Color.indigo.opacity(0.8),
-                    Color.purple.opacity(0.6)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            BackgroundGradientView()
 
             VStack(spacing: 0) {
 
                 // --- 1. Branding Header ---
-                HStack {
-                    Image(systemName: "moon.stars.fill")
-                        .foregroundColor(.white)
-                    Text("Insomnia")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                    Spacer()
-
-                    // Small status dot
-                    Circle()
-                        .fill(sleepTimer.isActive ? Color.green : Color.white.opacity(0.3))
-                        .frame(width: 8, height: 8)
-                        .shadow(radius: sleepTimer.isActive ? 2 : 0)
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 14)
+                BrandingHeaderView(isActive: sleepTimer.isActive)
 
                 // --- 2. Main Status Area ---
-                VStack(spacing: 4) {
-                    if sleepTimer.isActive {
-                        Text("Staying Awake")
-                            .font(.caption)
-                            .foregroundColor(.white.opacity(0.7))
-                            .textCase(.uppercase)
-
-                        Group {
-                            if sleepTimer.secondsRemaining == -1 {
-                                Image(systemName: "infinity")
-                                    .font(.system(size: 48, weight: .light))
-                                    .foregroundColor(.white)
-                            } else {
-                                Text(sleepTimer.timeRemainingDisplay)
-                                    .font(.system(size: 38, weight: .light, design: .monospaced))
-                                    .foregroundColor(.white)
-                                    .contentTransition(.numericText(countsDown: true))
-                                    .animation(.default, value: sleepTimer.timeRemainingDisplay)
-                            }
-                        }
-                        .frame(height: 50)
-                    } else {
-                        Text("System Normal")
-                            .font(.title3)
-                            .fontWeight(.medium)
-                            .foregroundColor(.white.opacity(0.9))
-
-                        Text("Select a duration")
-                            .font(.caption)
-                            .foregroundColor(.white.opacity(0.6))
-                    }
-                }
-                .frame(height: 80) // Fixed height for status area to prevent jumping
-                .padding(.top, 10)
+                StatusDisplayView(
+                    isActive: sleepTimer.isActive,
+                    secondsRemaining: sleepTimer.secondsRemaining,
+                    timeRemainingDisplay: sleepTimer.timeRemainingDisplay
+                )
 
                 Divider()
                     .background(Color.white.opacity(0.3))
@@ -107,127 +53,38 @@ struct ContentView: View {
                     .padding(.bottom, 8)
 
                 LazyVGrid(columns: columns, spacing: 8) {
-                    DurationButton(title: "10 Min", icon: "10.circle") { sleepTimer.start(minutes: 10) }
-                    DurationButton(title: "30 Min", icon: "30.circle") { sleepTimer.start(minutes: 30) }
-                    DurationButton(title: "1 Hour", icon: "clock") { sleepTimer.start(minutes: 60) }
-                    DurationButton(title: "Indefinite", icon: "infinity") { sleepTimer.start(minutes: -1) }
+                    AppButton(icon: "10.circle", title: "10 Min") { sleepTimer.start(minutes: 10) }
+                    AppButton(icon: "30.circle", title: "30 Min") { sleepTimer.start(minutes: 30) }
+                    AppButton(icon: "clock", title: "1 Hour") { sleepTimer.start(minutes: 60) }
+                    AppButton(icon: "infinity", title: "Indefinite") { sleepTimer.start(minutes: -1) }
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 8)
 
                 // --- 4. Custom Time Input ---
-                if showCustomTime {
-                    HStack(spacing: 10) {
-                        HStack {
-                            Image(systemName: "timer")
-                            TextField("Minutes", text: $customMinutes)
-                                .textFieldStyle(.plain)
-                                .font(.system(size: 14))
-                                .foregroundColor(.white)
-                                .frame(width: 60)
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .background(Color.white.opacity(0.2))
-                        .cornerRadius(8)
-
-                        Button(action: {
-                            if let mins = Int(customMinutes), mins > 0 {
-                                sleepTimer.start(minutes: mins)
-                                showCustomTime = false
-                                customMinutes = ""
-                            }
-                        }) {
-                            Image(systemName: "checkmark")
-                                .foregroundColor(.white)
-                                .frame(width: 36)
-                                .padding(.vertical, 8)
-                                .background(Color.green.opacity(0.7))
-                                .cornerRadius(8)
-                        }
-                        .buttonStyle(.plain)
-
-                        Button(action: {
-                            showCustomTime = false
-                            customMinutes = ""
-                        }) {
-                            Image(systemName: "xmark")
-                                .foregroundColor(.white)
-                                .frame(width: 36)
-                                .padding(.vertical, 8)
-                                .background(
-                                    LinearGradient(
-                                        colors: [Color.pink.opacity(0.8), Color.red.opacity(0.7)],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                                .cornerRadius(8)
-                        }
-                        .buttonStyle(.plain)
+                CustomTimeInputView(
+                    showCustomTime: $showCustomTime,
+                    customMinutes: $customMinutes,
+                    onStart: { minutes in
+                        sleepTimer.start(minutes: minutes)
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 10)
-                } else {
-                    Button(action: { showCustomTime = true }) {
-                        HStack {
-                            Image(systemName: "timer")
-                            Text("Custom Time")
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .background(Color.white.opacity(0.2))
-                        .cornerRadius(8)
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal)
-                }
-
-                // --- 4. Footer ---
-                if sleepTimer.isActive {
-                    Button(action: { sleepTimer.stop() }) {
-                        HStack {
-                            Image(systemName: "bed.double.fill")
-                            Text("Allow Sleep")
-                        }
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(
-                            LinearGradient(
-                                colors: [Color.pink.opacity(0.8), Color.red.opacity(0.7)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .cornerRadius(10)
-                    }
-                    .buttonStyle(.plain)
-                    .padding([.horizontal])
-                    .padding(.top, 8)
-                }
-
+                )
+                
                 Spacer(minLength: 24)
 
-                // Bottom Bar (Quit)
-                Button(action: {
-                    NSApplication.shared.terminate(nil)
-                }) {
-                    HStack {
-                        Image(systemName: "power")
-                        Text("Quit Insomnia")
+                // --- 5. Footer ---
+                if sleepTimer.isActive {
+                    AppButton(icon: "bed.double.fill", title: "Allow Sleep", style: .destructive) {
+                        sleepTimer.stop()
                     }
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.white.opacity(0.8))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(Color.white.opacity(0.15))
-                    .cornerRadius(8)
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
                 }
-                .buttonStyle(.plain)
+
+                // --- 6. Bottom Bar (Quit) ---
+                AppButton(icon: "power", title: "Quit Insomnia") {
+                    NSApplication.shared.terminate(nil)
+                }
                 .padding(.horizontal)
                 .padding(.bottom, 12)
             }
@@ -238,25 +95,119 @@ struct ContentView: View {
 
 }
 
-// Custom Button Component to keep code clean
-struct DurationButton: View {
-    let title: String
-    let icon: String
-    let action: () -> Void
+// MARK: - Status Display View
+
+struct StatusDisplayView: View {
+    let isActive: Bool
+    let secondsRemaining: Int
+    let timeRemainingDisplay: String
 
     var body: some View {
-        Button(action: action) {
-            HStack {
-                Image(systemName: icon)
-                Text(title)
+        VStack(spacing: 4) {
+            if isActive {
+                Text("Staying Awake")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.7))
+                    .textCase(.uppercase)
+
+                Group {
+                    if secondsRemaining == -1 {
+                        Image(systemName: "infinity")
+                            .font(.system(size: 48, weight: .light))
+                            .foregroundColor(.white)
+                    } else {
+                        Text(timeRemainingDisplay)
+                            .font(.system(size: 38, weight: .light, design: .monospaced))
+                            .foregroundColor(.white)
+                            .contentTransition(.numericText(countsDown: true))
+                            .animation(.default, value: timeRemainingDisplay)
+                    }
+                }
+                .frame(height: 50)
+            } else {
+                Text("System Normal")
+                    .font(.title3)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white.opacity(0.9))
+
+                Text("Select a duration")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.6))
             }
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity) // Fill the grid cell
-            .padding(.vertical, 8)
-            .background(Color.white.opacity(0.2))
-            .cornerRadius(8)
         }
-        .buttonStyle(.plain)
+        .frame(height: 80) // Fixed height for status area to prevent jumping
+        .padding(.top, 10)
+    }
+}
+
+// MARK: - Custom Time Input View
+
+struct CustomTimeInputView: View {
+    @Binding var showCustomTime: Bool
+    @Binding var customMinutes: String
+    let onStart: (Int) -> Void
+
+    var body: some View {
+        Group {
+            if showCustomTime {
+                HStack(spacing: 10) {
+                    HStack {
+                        Image(systemName: "timer")
+                        TextField("Minutes", text: $customMinutes)
+                            .textFieldStyle(.plain)
+                            .font(.system(size: 14))
+                            .foregroundColor(.white)
+                            .frame(width: 60)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .background(Color.white.opacity(0.2))
+                    .cornerRadius(8)
+
+                    Button(action: {
+                        if let mins = Int(customMinutes), mins > 0 {
+                            onStart(mins)
+                            showCustomTime = false
+                            customMinutes = ""
+                        }
+                    }) {
+                        Image(systemName: "checkmark")
+                            .foregroundColor(.white)
+                            .frame(width: 36)
+                            .padding(.vertical, 8)
+                            .background(Color.green.opacity(0.7))
+                            .cornerRadius(8)
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(action: {
+                        showCustomTime = false
+                        customMinutes = ""
+                    }) {
+                        Image(systemName: "xmark")
+                            .foregroundColor(.white)
+                            .frame(width: 36)
+                            .padding(.vertical, 8)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color.pink.opacity(0.8), Color.red.opacity(0.7)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(8)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal)
+            } else {
+                AppButton(icon: "timer", title: "Custom Time") {
+                    showCustomTime = true
+                }
+                .padding(.horizontal)
+            }
+        }
     }
 }
 

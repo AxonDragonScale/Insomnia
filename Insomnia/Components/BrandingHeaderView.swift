@@ -35,10 +35,11 @@ struct BrandingHeaderView: View {
 
 #Preview {
     ZStack {
-        Color.indigo
+        BackgroundGradientView()
         VStack {
             BrandingHeaderView(isActive: true)
             BrandingHeaderView(isActive: false)
         }
     }
+    .frame(width: AppLayout.windowWidth)
 }

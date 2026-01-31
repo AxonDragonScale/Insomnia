@@ -52,7 +52,7 @@ struct AppButton: View {
 
 #Preview {
     ZStack {
-        Color.indigo
+        BackgroundGradientView()
         VStack(spacing: 12) {
             AppButton(icon: "10.circle", title: "10 Min") {}
             AppButton(icon: "clock", title: "1 Hour") {}
@@ -62,4 +62,5 @@ struct AppButton: View {
         }
         .padding()
     }
+    .frame(width: AppLayout.windowWidth)
 }

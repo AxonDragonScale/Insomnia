@@ -46,7 +46,7 @@ struct IconButton: View {
 
 #Preview {
     ZStack {
-        Color.indigo
+        BackgroundGradientView()
         HStack(spacing: 12) {
             IconButton(icon: "checkmark", style: .confirm) {}
             IconButton(icon: "xmark", style: .destructive) {}
@@ -54,4 +54,5 @@ struct IconButton: View {
         }
         .padding()
     }
+    .frame(width: AppLayout.windowWidth)
 }

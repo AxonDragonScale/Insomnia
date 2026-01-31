@@ -8,9 +8,10 @@
 import SwiftUI
 
 struct ContentView: View {
-    // State variables
-    @State private var isBlockingSleep = false
-    @State private var timeRemaining: String = "00:00" // We will animate this later
+    // ViewModel
+    @StateObject private var sleepTimer = SleepTimer()
+
+    // Local UI state
     @State private var showCustomTime = false
     @State private var customMinutes: String = ""
 
@@ -48,31 +49,32 @@ struct ContentView: View {
 
                     // Small status dot
                     Circle()
-                        .fill(isBlockingSleep ? Color.green : Color.white.opacity(0.3))
+                        .fill(sleepTimer.isActive ? Color.green : Color.white.opacity(0.3))
                         .frame(width: 8, height: 8)
-                        .shadow(radius: isBlockingSleep ? 2 : 0)
+                        .shadow(radius: sleepTimer.isActive ? 2 : 0)
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 14)
 
                 // --- 2. Main Status Area ---
                 VStack(spacing: 4) {
-                    if isBlockingSleep {
+                    if sleepTimer.isActive {
                         Text("Staying Awake")
                             .font(.caption)
                             .foregroundColor(.white.opacity(0.7))
                             .textCase(.uppercase)
 
                         Group {
-                            if timeRemaining == "∞" {
+                            if sleepTimer.secondsRemaining == -1 {
                                 Image(systemName: "infinity")
                                     .font(.system(size: 48, weight: .light))
                                     .foregroundColor(.white)
                             } else {
-                                Text(timeRemaining)
+                                Text(sleepTimer.timeRemainingDisplay)
                                     .font(.system(size: 38, weight: .light, design: .monospaced))
                                     .foregroundColor(.white)
                                     .contentTransition(.numericText(countsDown: true))
+                                    .animation(.default, value: sleepTimer.timeRemainingDisplay)
                             }
                         }
                         .frame(height: 50)
@@ -105,10 +107,10 @@ struct ContentView: View {
                     .padding(.bottom, 8)
 
                 LazyVGrid(columns: columns, spacing: 8) {
-                    DurationButton(title: "10 Min", icon: "10.circle") { activate(min: 10) }
-                    DurationButton(title: "30 Min", icon: "30.circle") { activate(min: 30) }
-                    DurationButton(title: "1 Hour", icon: "clock") { activate(min: 60) }
-                    DurationButton(title: "Indefinite", icon: "infinity") { activate(min: -1) }
+                    DurationButton(title: "10 Min", icon: "10.circle") { sleepTimer.start(minutes: 10) }
+                    DurationButton(title: "30 Min", icon: "30.circle") { sleepTimer.start(minutes: 30) }
+                    DurationButton(title: "1 Hour", icon: "clock") { sleepTimer.start(minutes: 60) }
+                    DurationButton(title: "Indefinite", icon: "infinity") { sleepTimer.start(minutes: -1) }
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 8)
@@ -132,7 +134,7 @@ struct ContentView: View {
 
                         Button(action: {
                             if let mins = Int(customMinutes), mins > 0 {
-                                activate(min: mins)
+                                sleepTimer.start(minutes: mins)
                                 showCustomTime = false
                                 customMinutes = ""
                             }
@@ -184,8 +186,8 @@ struct ContentView: View {
                 }
 
                 // --- 4. Footer ---
-                if isBlockingSleep {
-                    Button(action: stop) {
+                if sleepTimer.isActive {
+                    Button(action: { sleepTimer.stop() }) {
                         HStack {
                             Image(systemName: "bed.double.fill")
                             Text("Allow Sleep")
@@ -234,15 +236,6 @@ struct ContentView: View {
         // No .frame(height: ...) here! It will shrink to fit.
     }
 
-    // --- Helper Logic Stubs ---
-    func activate(min: Int) {
-        isBlockingSleep = true
-        timeRemaining = min == -1 ? "∞" : "\(min):00"
-    }
-
-    func stop() {
-        isBlockingSleep = false
-    }
 }
 
 // Custom Button Component to keep code clean

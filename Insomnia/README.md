@@ -53,8 +53,8 @@ Connects the UI to the Logic.
 * [x] Project configured as Agent (UIElement).
 * [x] `MenuBarExtra` entry point established.
 * [x] `ContentView` UI fully implemented with Header, Grid, and Footer.
-* [ ] **Pending:** Implementation of `SleepManager` (IOKit logic).
-* [ ] **Pending:** Implementation of Timer/ViewModel to connect UI to Logic.
+* [x] Implementation of `SleepManager` (IOKit logic).
+* [x] Implementation of Timer/ViewModel to connect UI to Logic.
 
 ## LLM Instructions
 

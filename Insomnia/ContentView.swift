@@ -53,7 +53,7 @@ struct ContentView: View {
                     .padding(.bottom, 8)
 
                 LazyVGrid(columns: columns, spacing: 8) {
-                    AppButton(icon: "10.circle", title: "10 Min") { sleepTimer.start(minutes: 2) }
+                    AppButton(icon: "10.circle", title: "10 Min") { sleepTimer.start(minutes: 10) }
                     AppButton(icon: "30.circle", title: "30 Min") { sleepTimer.start(minutes: 30) }
                     AppButton(icon: "clock", title: "1 Hour") { sleepTimer.start(minutes: 60) }
                     AppButton(icon: "infinity", title: "Indefinite") { sleepTimer.start(minutes: -1) }

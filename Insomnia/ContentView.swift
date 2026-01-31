@@ -18,7 +18,7 @@ struct ContentView: View {
     // Grid layout for buttons
     let columns = [
         GridItem(.flexible()),
-        GridItem(.flexible())
+        GridItem(.flexible()),
     ]
 
     var body: some View {
@@ -39,27 +39,29 @@ struct ContentView: View {
                 )
 
                 Divider()
-                    .background(Color.white.opacity(0.3))
+                    .background(AppColors.subtleOverlay)
                     .padding(.horizontal)
-                    .padding(.top, 10)
-                    .padding(.bottom, 24)
+                    .padding(.top, Spacing.medium)
+                    .padding(.bottom, Spacing.extraLarge)
 
                 // --- 3. Duration Selection ---
                 Text("Keep Awake For")
                     .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(AppColors.primaryText)
                     .textCase(.uppercase)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, Spacing.small)
 
-                LazyVGrid(columns: columns, spacing: 8) {
+                LazyVGrid(columns: columns, spacing: Spacing.small) {
                     AppButton(icon: "10.circle", title: "10 Min") { sleepTimer.start(minutes: 10) }
                     AppButton(icon: "30.circle", title: "30 Min") { sleepTimer.start(minutes: 30) }
                     AppButton(icon: "clock", title: "1 Hour") { sleepTimer.start(minutes: 60) }
-                    AppButton(icon: "infinity", title: "Indefinite") { sleepTimer.start(minutes: -1) }
+                    AppButton(icon: "infinity", title: "Indefinite") {
+                        sleepTimer.start(minutes: -1)
+                    }
                 }
                 .padding(.horizontal)
-                .padding(.bottom, 8)
+                .padding(.bottom, Spacing.small)
 
                 // --- 4. Custom Time Input ---
                 CustomTimeInputView(
@@ -69,8 +71,8 @@ struct ContentView: View {
                         sleepTimer.start(minutes: minutes)
                     }
                 )
-                
-                Spacer(minLength: 24)
+
+                Spacer(minLength: Spacing.extraLarge)
 
                 // --- 5. Footer ---
                 if sleepTimer.isActive {
@@ -78,7 +80,7 @@ struct ContentView: View {
                         sleepTimer.stop()
                     }
                     .padding(.horizontal)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, Spacing.small)
                 }
 
                 // --- 6. Bottom Bar (Quit) ---
@@ -86,10 +88,10 @@ struct ContentView: View {
                     NSApplication.shared.terminate(nil)
                 }
                 .padding(.horizontal)
-                .padding(.bottom, 12)
+                .padding(.bottom, Spacing.medium)
             }
         }
-        .frame(width: 300) // Width is fixed, height is dynamic
+        .frame(width: AppLayout.windowWidth)  // Width is fixed, height is dynamic
         // No .frame(height: ...) here! It will shrink to fit.
     }
 
@@ -107,7 +109,7 @@ struct StatusDisplayView: View {
             if isActive {
                 Text("Staying Awake")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(AppColors.primaryText)
                     .textCase(.uppercase)
 
                 Group {
@@ -123,20 +125,20 @@ struct StatusDisplayView: View {
                             .animation(.default, value: timeRemainingDisplay)
                     }
                 }
-                .frame(height: 50)
+                .frame(height: AppLayout.countdownHeight)
             } else {
                 Text("System Normal")
                     .font(.title3)
                     .fontWeight(.medium)
-                    .foregroundColor(.white.opacity(0.9))
+                    .foregroundColor(AppColors.emphasizedText)
 
                 Text("Select a duration")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(AppColors.secondaryText)
             }
         }
-        .frame(height: 80) // Fixed height for status area to prevent jumping
-        .padding(.top, 10)
+        .frame(height: AppLayout.statusAreaHeight)  // Fixed height for status area to prevent jumping
+        .padding(.top, Spacing.medium)
     }
 }
 
@@ -161,44 +163,22 @@ struct CustomTimeInputView: View {
                     }
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .background(Color.white.opacity(0.2))
-                    .cornerRadius(8)
+                    .padding(.vertical, Spacing.small)
+                    .background(AppColors.backgroundOverlay)
+                    .cornerRadius(AppLayout.cornerRadius)
 
-                    Button(action: {
+                    IconButton(icon: "checkmark", style: .confirm) {
                         if let mins = Int(customMinutes), mins > 0 {
                             onStart(mins)
                             showCustomTime = false
                             customMinutes = ""
                         }
-                    }) {
-                        Image(systemName: "checkmark")
-                            .foregroundColor(.white)
-                            .frame(width: 36)
-                            .padding(.vertical, 8)
-                            .background(Color.green.opacity(0.7))
-                            .cornerRadius(8)
                     }
-                    .buttonStyle(.plain)
 
-                    Button(action: {
+                    IconButton(icon: "xmark", style: .destructive) {
                         showCustomTime = false
                         customMinutes = ""
-                    }) {
-                        Image(systemName: "xmark")
-                            .foregroundColor(.white)
-                            .frame(width: 36)
-                            .padding(.vertical, 8)
-                            .background(
-                                LinearGradient(
-                                    colors: [Color.pink.opacity(0.8), Color.red.opacity(0.7)],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .cornerRadius(8)
                     }
-                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal)
             } else {

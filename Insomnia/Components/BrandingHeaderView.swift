@@ -14,22 +14,22 @@ struct BrandingHeaderView: View {
         HStack {
             Image(systemName: "moon.stars.fill")
                 .foregroundColor(.white)
-            
+
             Text("Insomnia")
                 .font(.headline)
                 .fontWeight(.bold)
                 .foregroundColor(.white)
-            
+
             Spacer()
 
             // Small status dot
             Circle()
-                .fill(isActive ? Color.green : Color.white.opacity(0.3))
-                .frame(width: 12, height: 12)
+                .fill(isActive ? AppColors.activeGreen : AppColors.subtleOverlay)
+                .frame(width: AppLayout.statusDotSize, height: AppLayout.statusDotSize)
                 .shadow(radius: isActive ? 2 : 0)
         }
         .padding(.horizontal)
-        .padding(.vertical, 16)
+        .padding(.vertical, Spacing.large)
     }
 }
 

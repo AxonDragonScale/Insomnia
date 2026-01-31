@@ -19,7 +19,7 @@ struct AppButton: View {
     let action: () -> Void
 
     enum AppButtonStyle {
-        case normal       // white 0.2 background
+        case normal  // white 0.2 background
         case destructive  // pink→red gradient
     }
 
@@ -27,13 +27,9 @@ struct AppButton: View {
         Group {
             switch style {
             case .normal:
-                Color.white.opacity(0.2)
+                AppColors.backgroundOverlay
             case .destructive:
-                LinearGradient(
-                    colors: [Color.pink.opacity(0.8), Color.red.opacity(0.7)],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
+                AppColors.destructiveGradient
             }
         }
     }
@@ -46,9 +42,9 @@ struct AppButton: View {
             }
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
+            .padding(.vertical, Spacing.small)
             .background(backgroundColor)
-            .cornerRadius(8)
+            .cornerRadius(AppLayout.cornerRadius)
         }
         .buttonStyle(.plain)
     }
@@ -58,11 +54,11 @@ struct AppButton: View {
     ZStack {
         Color.indigo
         VStack(spacing: 12) {
-            AppButton(icon: "10.circle", title: "10 Min") { }
-            AppButton(icon: "clock", title: "1 Hour") { }
-            AppButton(icon: "timer", title: "Custom Time") { }
-            AppButton(icon: "power", title: "Quit Insomnia") { }
-            AppButton(icon: "bed.double.fill", title: "Allow Sleep", style: .destructive) { }
+            AppButton(icon: "10.circle", title: "10 Min") {}
+            AppButton(icon: "clock", title: "1 Hour") {}
+            AppButton(icon: "timer", title: "Custom Time") {}
+            AppButton(icon: "power", title: "Quit Insomnia") {}
+            AppButton(icon: "bed.double.fill", title: "Allow Sleep", style: .destructive) {}
         }
         .padding()
     }

@@ -5,8 +5,8 @@
 //  Created by Ronak Harkhani on 31/01/26.
 //
 
-import Foundation
 import Combine
+import Foundation
 import UserNotifications
 
 /// ViewModel that manages the countdown timer and coordinates with SleepManager.
@@ -60,7 +60,7 @@ final class SleepTimer: ObservableObject {
         } else {
             // Timed mode
             secondsRemaining = minutes * 60
-            timeRemainingDisplay = formatTime(secondsRemaining)
+            timeRemainingDisplay = secondsRemaining.formattedAsTime
         }
 
         isActive = true
@@ -112,27 +112,12 @@ final class SleepTimer: ObservableObject {
             stop()
         } else {
             // Update the display
-            timeRemainingDisplay = formatTime(secondsRemaining)
+            timeRemainingDisplay = secondsRemaining.formattedAsTime
 
             // Send one-minute warning notification
             if secondsRemaining == 60 {
                 NotificationManager.shared.sendOneMinuteWarning()
             }
-        }
-    }
-
-    /// Formats seconds into a MM:SS or HH:MM:SS string.
-    /// - Parameter totalSeconds: The total seconds to format.
-    /// - Returns: Formatted time string.
-    private func formatTime(_ totalSeconds: Int) -> String {
-        let hours = totalSeconds / 3600
-        let minutes = (totalSeconds % 3600) / 60
-        let seconds = totalSeconds % 60
-
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
-        } else {
-            return String(format: "%02d:%02d", minutes, seconds)
         }
     }
 

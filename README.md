@@ -53,10 +53,16 @@ Insomnia/
     ├── Assets.xcassets/          # App icons and colors
     │   ├── AccentColor.colorset/
     │   └── AppIcon.appiconset/
-    └── Components/               # Reusable UI components
-        ├── AppButton.swift
-        ├── BackgroundGradientView.swift
-        └── BrandingHeaderView.swift
+    ├── Components/               # Reusable UI components
+    │   ├── AppButton.swift
+    │   ├── IconButton.swift      # Icon-only button component
+    │   ├── BackgroundGradientView.swift
+    │   └── BrandingHeaderView.swift
+    ├── Constants/                # App-wide constants
+    │   ├── AppColors.swift       # Centralized color definitions
+    │   └── Spacing.swift         # Spacing and layout constants
+    └── Utilities/                # Helper utilities
+        └── TimeUtil.swift        # Time formatting extensions
 ```
 
 ---
@@ -180,6 +186,7 @@ struct InsomniaApp: App {
 - Sends 1-minute warning notification before expiry
 
 **Time Formatting:**
+- Uses `Int.formattedAsTime` extension from `TimeUtil.swift`
 - Under 1 hour: `MM:SS` (e.g., "29:45")
 - Over 1 hour: `H:MM:SS` (e.g., "1:30:00")
 - Indefinite: "∞" symbol
@@ -240,23 +247,41 @@ struct InsomniaApp: App {
 - `action: () -> Void` - Tap handler
 
 **Styles:**
-- `.normal`: White 20% opacity background
-- `.destructive`: Pink→Red gradient background
+- `.normal`: Uses `AppColors.backgroundOverlay`
+- `.destructive`: Uses `AppColors.destructiveGradient`
 
 ---
 
-### 7. Components/BackgroundGradientView.swift
+### 7. Components/IconButton.swift
+
+**Purpose:** Compact icon-only button for inline actions.
+
+**Parameters:**
+- `icon: String` - SF Symbol name
+- `style: IconButtonStyle` - `.normal`, `.confirm`, or `.destructive`
+- `action: () -> Void` - Tap handler
+
+**Styles:**
+- `.normal`: Uses `AppColors.backgroundOverlay`
+- `.confirm`: Uses `AppColors.confirmGreen`
+- `.destructive`: Uses `AppColors.destructiveGradient`
+
+**Usage:** Used in `CustomTimeInputView` for confirm/cancel actions.
+
+---
+
+### 8. Components/BackgroundGradientView.swift
 
 **Purpose:** Full-bleed gradient background.
 
-**Colors:**
+**Colors:** Uses `AppColors.backgroundGradient`
 - Base: Black
 - Overlay: Indigo (60% → 40%) to Purple (30%)
 - Direction: Top-leading to bottom-trailing
 
 ---
 
-### 8. Components/BrandingHeaderView.swift
+### 9. Components/BrandingHeaderView.swift
 
 **Purpose:** Header with app branding and status indicator.
 
@@ -264,6 +289,68 @@ struct InsomniaApp: App {
 - Moon icon (`moon.stars.fill`)
 - "Insomnia" title
 - Status dot (green when active, dim when idle)
+
+**Uses:** `AppColors.activeGreen`, `AppColors.subtleOverlay`, `AppLayout.statusDotSize`, `Spacing.large`
+
+---
+
+### 10. Constants/AppColors.swift
+
+**Purpose:** Centralized color constants for consistent theming.
+
+**Text Colors:**
+- `primaryText` - White 70% opacity
+- `secondaryText` - White 60% opacity
+- `emphasizedText` - White 90% opacity
+
+**Background Colors:**
+- `backgroundOverlay` - White 20% opacity (buttons/inputs)
+- `subtleOverlay` - White 30% opacity (dividers/inactive)
+
+**Status Colors:**
+- `activeGreen` - Green (status indicators)
+- `confirmGreen` - Green 70% opacity (confirm buttons)
+
+**Gradients:**
+- `destructiveGradient` - Pink to red (destructive actions)
+- `backgroundGradient` - Indigo to purple (app background)
+
+---
+
+### 11. Constants/Spacing.swift
+
+**Purpose:** Consistent spacing and layout dimensions.
+
+**Spacing enum:**
+- `small` - 8pt
+- `medium` - 12pt
+- `large` - 16pt
+- `extraLarge` - 24pt
+
+**AppLayout enum:**
+- `windowWidth` - 300pt
+- `statusAreaHeight` - 80pt
+- `countdownHeight` - 50pt
+- `statusDotSize` - 12pt
+- `iconButtonWidth` - 36pt
+- `cornerRadius` - 8pt
+
+---
+
+### 12. Utilities/TimeUtil.swift
+
+**Purpose:** Time formatting utilities.
+
+**Int Extension:**
+```swift
+extension Int {
+    var formattedAsTime: String
+}
+```
+
+Converts seconds to formatted time string:
+- Under 1 hour: `MM:SS` (e.g., "29:45")
+- Over 1 hour: `H:MM:SS` (e.g., "1:30:00")
 
 ---
 
@@ -408,8 +495,12 @@ MenuBarExtra("Insomnia", systemImage: "moon.fill") { ... }
 | Power assertion type | `SleepManager.swift` |
 | Notification text/timing | `NotificationManager.swift` |
 | Button styling | `Components/AppButton.swift` |
+| Icon-only buttons | `Components/IconButton.swift` |
 | Background colors | `Components/BackgroundGradientView.swift` |
 | Header layout | `Components/BrandingHeaderView.swift` |
+| Theme colors | `Constants/AppColors.swift` |
+| Spacing/dimensions | `Constants/Spacing.swift` |
+| Time formatting | `Utilities/TimeUtil.swift` |
 | App permissions | `Insomnia.entitlements` |
 
 ---
@@ -424,6 +515,10 @@ MenuBarExtra("Insomnia", systemImage: "moon.fill") { ... }
 - [x] NotificationManager with 1-minute warning
 - [x] Reusable UI components extracted
 - [x] Custom time input support
+- [x] Centralized color constants (`AppColors`)
+- [x] Centralized spacing/layout constants (`Spacing`, `AppLayout`)
+- [x] Time formatting utility (`TimeUtil`)
+- [x] Icon-only button component (`IconButton`)
 
 ---
 

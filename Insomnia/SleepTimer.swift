@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import UserNotifications
 
 /// ViewModel that manages the countdown timer and coordinates with SleepManager.
 /// Publishes state changes for SwiftUI to observe.
@@ -86,6 +87,9 @@ final class SleepTimer: ObservableObject {
         // Allow system to sleep
         SleepManager.shared.allowSleep()
 
+        // Cancel any pending notifications
+        NotificationManager.shared.cancelAllNotifications()
+
         // Reset state
         isActive = false
         isIndefinite = false
@@ -109,6 +113,11 @@ final class SleepTimer: ObservableObject {
         } else {
             // Update the display
             timeRemainingDisplay = formatTime(secondsRemaining)
+
+            // Send one-minute warning notification
+            if secondsRemaining == 60 {
+                NotificationManager.shared.sendOneMinuteWarning()
+            }
         }
     }
 

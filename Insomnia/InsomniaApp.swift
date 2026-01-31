@@ -9,6 +9,12 @@ import SwiftUI
 
 @main
 struct InsomniaApp: App {
+
+    init() {
+        // Request notification permissions at app launch
+        NotificationManager.shared.requestAuthorization()
+    }
+
     var body: some Scene {
         MenuBarExtra("Insomnia", systemImage: "cup.and.saucer.fill") {
             ContentView()

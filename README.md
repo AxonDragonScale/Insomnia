@@ -105,15 +105,72 @@ Launch at Login is managed separately via `Core/LaunchAtLoginManager.swift` usin
 
 ## Build & Run
 
+### Debug Build (Development)
+
 1. Open `Insomnia.xcodeproj` in Xcode 16.3+
+2. Select **Product → Scheme → Edit Scheme** (⌘<)
+3. Set **Build Configuration** to **Debug**
+4. Build and run (⌘R)
+5. App appears as "Insomnia Debug" in menu bar
+
+### Release Build (Production)
+
+1. Set **Build Configuration** to **Release** in scheme editor
 2. Build and run (⌘R)
-3. App appears as icon in menu bar
+3. App appears as "Insomnia" in menu bar
+
+**Note:** Debug and Release versions can run simultaneously (different bundle IDs).
+
+| Configuration | Bundle ID | Product Name |
+|---------------|-----------|--------------|
+| Debug | `com.axondragonscale.Insomnia.debug` | Insomnia Debug |
+| Release | `com.axondragonscale.Insomnia` | Insomnia |
 
 **Verify sleep prevention:**
 ```bash
 pmset -g assertions
 # Look for "Insomnia is keeping the system awake"
 ```
+
+---
+
+## Distribution
+
+### Building a Release
+
+Run the build script to create distributable DMG and ZIP files:
+
+```bash
+cd Insomnia
+./Scripts/build_release.sh 1.0.0
+```
+
+This will:
+1. Build the Release configuration
+2. Create `Insomnia-1.0.0.dmg` with Applications symlink
+3. Create `Insomnia-1.0.0.zip` as alternative
+4. Generate SHA256 checksums
+
+Output files will be in `build/`.
+
+### GitHub Releases
+
+1. Create a new release with tag `v1.0.0`
+2. Upload the DMG and ZIP files
+3. Include checksums in release notes:
+   ```
+   ## Checksums (SHA256)
+   - Insomnia-1.0.0.dmg: `<checksum>`
+   - Insomnia-1.0.0.zip: `<checksum>`
+   ```
+
+### Installation Note
+
+Since the app is not notarized, users need to bypass Gatekeeper on first launch:
+- **Right-click → Open → Open**, or
+- **System Settings → Privacy & Security → Open Anyway**
+
+See [INSTALL.md](INSTALL.md) for detailed installation instructions.
 
 ---
 
@@ -152,6 +209,40 @@ pmset -g assertions
 - [ ] `pmset -g assertions` shows correct assertion type
 - [ ] Manual sleep blocked when setting enabled
 - [ ] Launch at Login toggle works (check System Settings > General > Login Items)
+
+---
+
+## Project Files
+
+| File | Purpose |
+|------|---------|
+| `Scripts/build_release.sh` | Local build script for distribution |
+| `INSTALL.md` | User installation instructions |
+| `.github/workflows/release.yml` | GitHub Actions workflow for automated releases |
+
+---
+
+## CI/CD with GitHub Actions
+
+### Automated Releases (`release.yml`)
+
+**Trigger via Git tag:**
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+**Or trigger manually:**
+1. Go to **Actions → Build and Release**
+2. Click **Run workflow**
+3. Enter the version number (e.g., `1.0.0`)
+
+The workflow will:
+1. Build the Release configuration
+2. Create DMG and ZIP files
+3. Generate SHA256 checksums
+4. Create a GitHub Release with all artifacts
+5. Auto-generate release notes from commits
 
 ---
 

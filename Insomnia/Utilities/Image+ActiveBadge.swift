@@ -11,9 +11,17 @@ import SwiftUI
 // MARK: - SwiftUI Image Extension
 
 extension Image {
-    
-    static func withActiveBadge(systemName: String, isActive: Bool) -> Image {
-        let baseIcon = NSImage(systemSymbolName: systemName, accessibilityDescription: nil) ?? NSImage()
+
+    /// Creates an image with active badge using AppIcon's active/inactive states.
+    static func withActiveBadge(appIcon: AppIcon, isActive: Bool, size: CGFloat? = nil) -> Image {
+        let symbolName = appIcon.symbolName(isActive: isActive)
+        return withActiveBadge(systemName: symbolName, isActive: isActive, size: size)
+    }
+
+    static func withActiveBadge(systemName: String, isActive: Bool, size: CGFloat? = nil) -> Image {
+        let config = size.map { NSImage.SymbolConfiguration(pointSize: $0, weight: .regular) }
+        let baseIcon = NSImage(systemSymbolName: systemName, accessibilityDescription: nil)?
+            .withSymbolConfiguration(config ?? .init()) ?? NSImage()
 
         guard isActive else {
             // Use template mode for automatic light/dark adaptation

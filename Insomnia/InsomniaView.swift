@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct InsomniaView: View {
+    
     // ViewModel (owned by InsomniaApp, passed in for menu bar icon updates)
     @ObservedObject var sleepTimer: SleepTimer
 

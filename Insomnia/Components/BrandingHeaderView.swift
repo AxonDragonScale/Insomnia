@@ -12,26 +12,19 @@ struct BrandingHeaderView: View {
     let currentPage: AppPage
     let onNavigate: (AppPage) -> Void
 
-    var body: some View {
-        HStack {
-            // App branding
-            Image(systemName: "moon.stars.fill")
-                .foregroundColor(.white)
+    @AppStorage(AppIcon.storageKey) private var selectedIconRaw: String = AppIcon.defaultIcon.rawValue
 
-            Text("Insomnia")
-                .font(.headline)
-                .fontWeight(.bold)
+    var body: some View {
+        HStack(spacing: Spacing.medium) {
+            // App branding with active badge
+            Image.withActiveBadge(appIcon: AppIcon.from(selectedIconRaw), isActive: isActive, size: 18)
+
+            Text("INSOMNIA")
+                .font(.system(size: 12, weight: .regular, design: .monospaced))
+                .tracking(1)
                 .foregroundColor(.white)
 
             Spacer()
-
-            // Status dot (only on home page)
-            if currentPage == .home {
-                Circle()
-                    .fill(isActive ? AppColors.activeGreen : AppColors.subtleOverlay)
-                    .frame(width: AppDimensions.statusDotSize, height: AppDimensions.statusDotSize)
-                    .shadow(radius: isActive ? 2 : 0)
-            }
 
             // Trailing: Settings/Close button
             Button(action: {
@@ -56,7 +49,11 @@ struct BrandingHeaderView: View {
         BackgroundGradientView()
         VStack {
             BrandingHeaderView(isActive: true, currentPage: .home, onNavigate: { _ in })
+                .border(.red)
+
             BrandingHeaderView(isActive: false, currentPage: .settings, onNavigate: { _ in })
+                .border(.red)
+
         }
     }
     .frame(width: AppDimensions.windowWidth)

@@ -35,6 +35,8 @@ xcodebuild -project "$PROJECT_NAME.xcodeproj" \
            CODE_SIGN_STYLE=Manual \
            DEVELOPMENT_TEAM="" \
            SYMROOT="$BUILD_DIR" \
+           MARKETING_VERSION="$VERSION" \
+           CURRENT_PROJECT_VERSION="$VERSION" \
            build \
            | grep -E "(Build|error:|warning:|\*\*)" || true
 

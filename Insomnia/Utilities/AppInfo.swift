@@ -31,15 +31,11 @@ struct AppInfo {
 
     // MARK: - App Info
 
-    /// The app's display name (e.g., "Insomnia" or "Insomnia (Debug)")
+    /// The app's display name (e.g., "Insomnia" or "Insomnia Debug")
     static var appName: String {
-        let baseName = Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "Insomnia"
-        return isDebug ? "\(baseName) Debug" : baseName
-    }
-
-    /// The app's base name without debug suffix (e.g., "Insomnia")
-    static var appBaseName: String {
-        Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "Insomnia"
+        Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String
+            ?? Bundle.main.infoDictionary?["CFBundleName"] as? String
+            ?? "Insomnia"
     }
 
     /// The app's marketing version (e.g., "1.0.0")

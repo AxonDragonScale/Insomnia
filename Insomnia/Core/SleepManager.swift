@@ -16,6 +16,11 @@ final class SleepManager {
 
     static let shared = SleepManager()
 
+    // MARK: - Storage Keys
+
+    /// Storage key for the prevent manual sleep setting.
+    static let preventManualSleepKey = "preventManualSleep"
+
     // MARK: - Properties
 
     /// The current power assertion ID. `kIOPMNullAssertionID` when no assertion is active.
@@ -23,6 +28,9 @@ final class SleepManager {
 
     /// Indicates whether sleep is currently being blocked.
     private(set) var isPreventingSleep: Bool = false
+
+    /// Tracks the current assertion type to detect changes.
+    private var currentPreventManualSleep: Bool = false
 
     /// The reason string shown in system diagnostics (e.g., `pmset -g assertions`).
     private let assertionReason = "Insomnia is keeping the system awake" as CFString
@@ -34,18 +42,27 @@ final class SleepManager {
     // MARK: - Public Methods
 
     /// Prevents the system and display from sleeping.
+    /// - Parameter preventManualSleep: If `true`, prevents sleep even from Apple menu or power button.
+    ///   If `false`, only prevents idle sleep. Note: Lid close cannot be prevented on MacBooks.
     /// - Returns: `true` if the assertion was successfully created, `false` otherwise.
     @discardableResult
-    func preventSleep() -> Bool {
-        // If already preventing sleep, return success
-        guard !isPreventingSleep else {
+    func preventSleep(preventManualSleep: Bool = false) -> Bool {
+        // If already preventing sleep with same settings, return success
+        if isPreventingSleep && currentPreventManualSleep == preventManualSleep {
             return true
         }
 
-        // Create a power assertion to prevent display sleep
-        // Using kIOPMAssertionTypePreventUserIdleDisplaySleep keeps the display on,
-        // which also prevents the lock screen from engaging.
-        let assertionType = kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString
+        // If settings changed, release old assertion first
+        if isPreventingSleep {
+            allowSleep()
+        }
+
+        // Choose assertion type based on setting:
+        // - kIOPMAssertionTypePreventUserIdleDisplaySleep: Prevents idle sleep only
+        // - kIOPMAssertionTypePreventSystemSleep: Prevents idle + manual sleep (Apple menu, power button)
+        let assertionType: CFString = preventManualSleep
+            ? kIOPMAssertionTypePreventSystemSleep as CFString
+            : kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString
 
         let result = IOPMAssertionCreateWithName(
             assertionType,
@@ -56,6 +73,7 @@ final class SleepManager {
 
         if result == kIOReturnSuccess {
             isPreventingSleep = true
+            currentPreventManualSleep = preventManualSleep
             return true
         } else {
             assertionID = IOPMAssertionID(kIOPMNullAssertionID)

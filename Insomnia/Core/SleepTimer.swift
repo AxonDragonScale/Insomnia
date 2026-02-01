@@ -7,6 +7,7 @@
 
 import Combine
 import Foundation
+import SwiftUI
 import UserNotifications
 
 /// ViewModel that manages the countdown timer and coordinates with SleepManager.
@@ -33,6 +34,9 @@ final class SleepTimer: ObservableObject {
     /// Indicates if running in indefinite mode.
     private var isIndefinite: Bool = false
 
+    /// Access to the prevent manual sleep setting.
+    @AppStorage(SleepManager.preventManualSleepKey) private var preventManualSleep: Bool = false
+
     // MARK: - Initialization
 
     init() {}
@@ -45,7 +49,7 @@ final class SleepTimer: ObservableObject {
         // Calculate seconds until target time
         let secondsUntil = Int(targetTime.timeIntervalSince(Date()))
         guard secondsUntil >= 60 else { return }
-        
+
         // Convert to minutes (rounding up to ensure we reach the target)
         let minutes = (secondsUntil + 59) / 60
         start(minutes: minutes)
@@ -58,7 +62,7 @@ final class SleepTimer: ObservableObject {
         stop()
 
         // Activate sleep prevention
-        guard SleepManager.shared.preventSleep() else {
+        guard SleepManager.shared.preventSleep(preventManualSleep: preventManualSleep) else {
             // Failed to create assertion
             return
         }

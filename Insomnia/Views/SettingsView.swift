@@ -10,6 +10,7 @@ import SwiftUI
 struct SettingsView: View {
 
     @AppStorage(AppIcon.storageKey) private var selectedIconRaw: String = AppIcon.defaultIcon.rawValue
+    @AppStorage(SleepManager.preventManualSleepKey) private var preventManualSleep: Bool = false
 
     var body: some View {
         VStack(spacing: Spacing.medium) {
@@ -31,6 +32,44 @@ struct SettingsView: View {
                     )
                 }
             }
+            .padding(.horizontal)
+
+            Divider()
+                .background(AppColors.subtleOverlay)
+                .padding(.horizontal)
+                .padding(.vertical, Spacing.medium)
+
+            // --- Prevent System Sleep Section ---
+            Text("Behavior")
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(AppColors.primaryText)
+                .textCase(.uppercase)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal)
+
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Prevent Manual Sleep")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(AppColors.emphasizedText)
+
+                    Text("Block sleep from Apple menu and power button. Lid close cannot be prevented.")
+                        .font(.caption)
+                        .foregroundColor(AppColors.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer()
+
+                Toggle("", isOn: $preventManualSleep)
+                    .toggleStyle(.switch)
+                    .tint(AppColors.activeGreen)
+                    .labelsHidden()
+            }
+            .padding(Spacing.medium)
+            .background(AppColors.backgroundOverlay)
+            .cornerRadius(AppDimensions.cornerRadius)
             .padding(.horizontal)
 
             Spacer()

@@ -45,16 +45,20 @@ Insomnia/
 ├── .gitignore                    # Git ignore rules
 └── Insomnia/                     # Main source directory
     ├── InsomniaApp.swift         # App entry point
-    ├── InsomniaView.swift        # Main UI view
+    ├── InsomniaView.swift        # Main container view with navigation
     ├── Insomnia.entitlements     # App sandbox entitlements
     ├── Assets.xcassets/          # App icons and colors
     │   ├── AccentColor.colorset/
     │   └── AppIcon.appiconset/
+    ├── Views/                    # Page views
+    │   ├── AppPage.swift         # Navigation state enum
+    │   ├── HomeView.swift        # Home page content
+    │   └── SettingsView.swift    # Settings page content
     ├── Components/               # Reusable UI components
     │   ├── AppButton.swift
     │   ├── IconButton.swift      # Icon-only button component
     │   ├── BackgroundGradientView.swift
-    │   └── BrandingHeaderView.swift
+    │   └── BrandingHeaderView.swift  # Header with navigation buttons
     ├── Core/                     # Core business logic
     │   ├── SleepManager.swift    # IOKit power assertion logic
     │   ├── SleepTimer.swift      # Timer ViewModel
@@ -81,10 +85,17 @@ Insomnia/
                       ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                       InsomniaView                          │
-│              (Main UI - @StateObject sleepTimer)            │
-└───────┬─────────────────────────────────────────────────────┘
-        │                                     │
-        ▼                                     ▼
+│         (Container - @State currentPage: AppPage)           │
+│         BackgroundGradientView + BrandingHeaderView         │
+└───────┬─────────────────────────┬───────────────────────────┘
+        │                         │
+        ▼                         ▼
+┌───────────────────┐   ┌─────────────────────────┐
+│     HomeView      │   │      SettingsView       │
+│  (when .home)     │   │    (when .settings)     │
+└───────┬───────────┘   └─────────────────────────┘
+        │
+        ▼
 ┌───────────────────┐               ┌─────────────────────────┐
 │    SleepTimer     │──────────────▶│     SleepManager        │
 │    (ViewModel)    │               │   (IOKit Singleton)     │
@@ -100,6 +111,15 @@ Insomnia/
 │ 1-minute warning  │
 └───────────────────┘
 ```
+
+### Navigation
+
+- **AppPage enum** defines available pages: `.home`, `.settings`
+- **InsomniaView** maintains `@State currentPage` for navigation
+- **BrandingHeaderView** displays navigation buttons:
+  - Home page: Settings gear icon (→ navigates to settings)
+  - Settings page: Back chevron (→ returns to home)
+- Page transitions use `.opacity` animation for smooth switching
 
 ### State Management
 
@@ -506,14 +526,18 @@ MenuBarExtra("Insomnia", systemImage: "moon.fill") { ... }
 | To Change... | Edit File |
 |--------------|-----------|
 | Menu bar icon | `InsomniaApp.swift` |
-| Duration options | `InsomniaView.swift` |
+| Page navigation | `InsomniaView.swift` |
+| Navigation state enum | `Views/AppPage.swift` |
+| Home page content | `Views/HomeView.swift` |
+| Settings page content | `Views/SettingsView.swift` |
+| Duration options | `Views/HomeView.swift` |
 | Timer logic | `Core/SleepTimer.swift` |
 | Power assertion type | `Core/SleepManager.swift` |
 | Notification text/timing | `Core/NotificationManager.swift` |
 | Button styling | `Components/AppButton.swift` |
 | Icon-only buttons | `Components/IconButton.swift` |
 | Background colors | `Components/BackgroundGradientView.swift` |
-| Header layout | `Components/BrandingHeaderView.swift` |
+| Header layout/navigation | `Components/BrandingHeaderView.swift` |
 | Theme colors | `Constants/AppColors.swift` |
 | Spacing/dimensions | `Constants/Spacing.swift` |
 | Time formatting | `Utilities/TimeUtil.swift` |
@@ -536,6 +560,8 @@ MenuBarExtra("Insomnia", systemImage: "moon.fill") { ... }
 - [x] Centralized spacing/layout constants (`Spacing`, `AppLayout`)
 - [x] Time formatting utility (`TimeUtil`)
 - [x] Icon-only button component (`IconButton`)
+- [x] Multi-page navigation (Home/Settings)
+- [x] Settings page placeholder
 
 ---
 

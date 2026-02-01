@@ -34,9 +34,6 @@ final class SleepTimer: ObservableObject {
     /// Indicates if running in indefinite mode.
     private var isIndefinite: Bool = false
 
-    /// Access to the prevent manual sleep setting.
-    @AppStorage(SleepManager.preventManualSleepKey) private var preventManualSleep: Bool = false
-
     // MARK: - Initialization
 
     init() {}
@@ -62,7 +59,7 @@ final class SleepTimer: ObservableObject {
         stop()
 
         // Activate sleep prevention
-        guard SleepManager.shared.preventSleep(preventManualSleep: preventManualSleep) else {
+        guard SleepManager.shared.preventSleep(preventManualSleep: AppPrefs.shared.preventManualSleep) else {
             // Failed to create assertion
             return
         }

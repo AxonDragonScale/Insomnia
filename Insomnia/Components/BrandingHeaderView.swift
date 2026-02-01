@@ -12,12 +12,12 @@ struct BrandingHeaderView: View {
     let currentPage: AppPage
     let onNavigate: (AppPage) -> Void
 
-    @AppStorage(AppIcon.storageKey) private var selectedIconRaw: String = AppIcon.defaultIcon.rawValue
+    @ObservedObject private var prefs = AppPrefs.shared
 
     var body: some View {
         HStack(spacing: Spacing.medium) {
             // App branding with active badge
-            Image.withActiveBadge(appIcon: AppIcon.from(selectedIconRaw), isActive: isActive, size: 18)
+            Image.withActiveBadge(appIcon: prefs.selectedAppIcon, isActive: isActive, size: 18)
 
             Text("INSOMNIA")
                 .font(.system(size: 12, weight: .regular, design: .monospaced))

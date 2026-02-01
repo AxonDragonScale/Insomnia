@@ -9,8 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
 
-    @AppStorage(AppIcon.storageKey) private var selectedIconRaw: String = AppIcon.defaultIcon.rawValue
-    @AppStorage(SleepManager.preventManualSleepKey) private var preventManualSleep: Bool = false
+    @ObservedObject private var prefs = AppPrefs.shared
 
     var body: some View {
         VStack(spacing: Spacing.medium) {
@@ -27,8 +26,8 @@ struct SettingsView: View {
                 ForEach(AppIcon.allCases) { icon in
                     IconOption(
                         icon: icon,
-                        isSelected: icon == AppIcon.from(selectedIconRaw),
-                        onSelect: { selectedIconRaw = icon.rawValue }
+                        isSelected: icon == prefs.selectedAppIcon,
+                        onSelect: { prefs.selectedAppIcon = icon }
                     )
                 }
             }
@@ -62,7 +61,7 @@ struct SettingsView: View {
 
                 Spacer()
 
-                Toggle("", isOn: $preventManualSleep)
+                Toggle("", isOn: $prefs.preventManualSleep)
                     .toggleStyle(.switch)
                     .tint(AppColors.activeGreen)
                     .labelsHidden()

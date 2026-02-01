@@ -16,11 +16,6 @@ final class SleepManager {
 
     static let shared = SleepManager()
 
-    // MARK: - Storage Keys
-
-    /// Storage key for the prevent manual sleep setting.
-    static let preventManualSleepKey = "preventManualSleep"
-
     // MARK: - Properties
 
     /// The current power assertion ID. `kIOPMNullAssertionID` when no assertion is active.

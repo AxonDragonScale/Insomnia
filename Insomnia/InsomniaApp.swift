@@ -13,8 +13,8 @@ struct InsomniaApp: App {
     /// Shared SleepTimer instance owned by the App for menu bar icon updates
     @StateObject private var sleepTimer = SleepTimer()
 
-    /// Selected app icon from settings
-    @AppStorage(AppIcon.storageKey) private var selectedIconRaw: String = AppIcon.defaultIcon.rawValue
+    /// Shared preferences
+    @ObservedObject private var prefs = AppPrefs.shared
 
     init() {
         // Request notification permissions at app launch
@@ -25,7 +25,7 @@ struct InsomniaApp: App {
         MenuBarExtra {
             InsomniaView(sleepTimer: sleepTimer)
         } label: {
-            Image.withActiveBadge(appIcon: AppIcon.from(selectedIconRaw), isActive: sleepTimer.isActive)
+            Image.withActiveBadge(appIcon: prefs.selectedAppIcon, isActive: sleepTimer.isActive)
         }
         .menuBarExtraStyle(.window)
     }

@@ -69,6 +69,9 @@ struct SettingsView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .padding(.top, Spacing.small)
+        .onAppear {
+            launchManager.refreshStatus()
+        }
     }
 }
 

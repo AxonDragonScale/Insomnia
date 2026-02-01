@@ -10,6 +10,7 @@ import SwiftUI
 struct SettingsView: View {
 
     @ObservedObject private var prefs = AppPrefs.shared
+    @ObservedObject private var launchManager = LaunchAtLoginManager.shared
 
     var body: some View {
         VStack(spacing: Spacing.medium) {
@@ -46,6 +47,12 @@ struct SettingsView: View {
                 .textCase(.uppercase)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal)
+
+            SettingsToggle(
+                title: "Launch at Login",
+                subtitle: "Automatically start Insomnia when you log in.",
+                isOn: $launchManager.isEnabled
+            )
 
             SettingsToggle(
                 title: "Prevent Manual Sleep",
@@ -183,5 +190,8 @@ private struct IconOption: View {
         BackgroundGradientView()
         SettingsView()
     }
-    .frame(width: AppDimensions.windowWidth, height: 300)
+    .frame(
+        width: AppDimensions.windowWidth,
+        height: AppDimensions.windowHeight
+    )
 }

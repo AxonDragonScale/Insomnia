@@ -18,10 +18,9 @@ enum Spacing {
 /// Layout dimensions for specific components
 enum AppDimensions {
     static let windowWidth: CGFloat = 300
-    static let contentHeight: CGFloat = 420
+    static let windowHeight: CGFloat = 420
     static let statusAreaHeight: CGFloat = 80
     static let countdownHeight: CGFloat = 50
-    static let statusDotSize: CGFloat = 12
     static let iconButtonWidth: CGFloat = 36
     static let cornerRadius: CGFloat = 8
 }

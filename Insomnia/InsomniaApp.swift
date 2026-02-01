@@ -19,6 +19,14 @@ struct InsomniaApp: App {
     init() {
         // Request notification permissions at app launch
         NotificationManager.shared.requestAuthorization()
+
+        // Enable launch at login on first app open
+        if AppPrefs.shared.isFirstLaunch {
+            AppPrefs.shared.isFirstLaunch = false
+            Task { @MainActor in
+                LaunchAtLoginManager.shared.isEnabled = true
+            }
+        }
     }
 
     var body: some Scene {

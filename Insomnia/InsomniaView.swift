@@ -41,7 +41,7 @@ struct InsomniaView: View {
                         SettingsView()
                     }
                 }
-                .frame(height: AppDimensions.contentHeight)
+                .frame(height: AppDimensions.windowHeight)
                 .transition(.opacity)
             }
         }

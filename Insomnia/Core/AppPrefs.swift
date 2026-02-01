@@ -22,6 +22,7 @@ final class AppPrefs: ObservableObject {
         static let preventManualSleep = "preventManualSleep"
         static let notificationEnabled = "notificationEnabled"
         static let notificationMinutes = "notificationMinutes"
+        static let isFirstLaunch = "isFirstLaunch"
     }
 
     // MARK: - Published Properties
@@ -37,6 +38,9 @@ final class AppPrefs: ObservableObject {
 
     /// Minutes before expiry to trigger notification.
     @AppStorage(Keys.notificationMinutes) var notificationMinutes: Int = 1
+
+    /// Whether this is the first launch of the app. Used for first-launch setup.
+    @AppStorage(Keys.isFirstLaunch) var isFirstLaunch: Bool = true
 
     // MARK: - Computed Properties
 

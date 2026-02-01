@@ -77,6 +77,7 @@ InsomniaApp (MenuBarExtra)
 - **Customizable Icon:** 6 icon options with active/inactive states
 - **Prevent Manual Sleep:** Optional setting to block Apple menu/power button sleep
 - **1-Minute Warning:** Notification before timer expires
+- **Launch at Login:** Optionally start automatically when you log in
 
 ### Sleep Prevention Modes
 
@@ -97,6 +98,8 @@ All user settings are centralized in `Core/AppPrefs.swift`:
 | `preventManualSleep` | Bool | `false` | Block manual sleep triggers |
 | `notificationEnabled` | Bool | `true` | Show notification before expiry |
 | `notificationMinutes` | Int | `1` | Minutes before expiry to notify (1, 2, 5, 10) |
+
+Launch at Login is managed separately via `Core/LaunchAtLoginManager.swift` using `SMAppService`.
 
 ---
 
@@ -122,6 +125,7 @@ pmset -g assertions
 | User preferences | `Core/AppPrefs.swift` |
 | Timer logic | `Core/SleepTimer.swift` |
 | Power assertion | `Core/SleepManager.swift` |
+| Launch at login | `Core/LaunchAtLoginManager.swift` |
 | Home page UI | `Views/HomeView.swift` |
 | Settings UI | `Views/SettingsView.swift` |
 | Available icons | `Constants/AppIcon.swift` |
@@ -147,6 +151,7 @@ pmset -g assertions
 - [ ] Settings persist after restart
 - [ ] `pmset -g assertions` shows correct assertion type
 - [ ] Manual sleep blocked when setting enabled
+- [ ] Launch at Login toggle works (check System Settings > General > Login Items)
 
 ---
 

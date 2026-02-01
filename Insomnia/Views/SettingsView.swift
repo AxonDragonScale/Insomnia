@@ -13,7 +13,7 @@ struct SettingsView: View {
     @ObservedObject private var launchManager = LaunchAtLoginManager.shared
 
     var body: some View {
-        VStack(spacing: Spacing.medium) {
+        VStack(spacing: Spacing.small) {
             // --- Icon Selection Section ---
             Text("App Icon")
                 .font(.caption)
@@ -85,7 +85,7 @@ private struct NotificationSettings: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Expiry Notification")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundColor(AppColors.emphasizedText)
 
                 HStack(spacing: 4) {
@@ -141,7 +141,7 @@ private struct SettingsToggle: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundColor(AppColors.emphasizedText)
 
                 Text(subtitle)

@@ -127,9 +127,10 @@ final class SleepTimer: ObservableObject {
             // Update the display
             timeRemainingDisplay = secondsRemaining.formattedAsTime
 
-            // Send one-minute warning notification
-            if secondsRemaining == 60 {
-                NotificationManager.shared.sendOneMinuteWarning()
+            // Send warning notification if enabled
+            let prefs = AppPrefs.shared
+            if prefs.notificationEnabled && secondsRemaining == prefs.notificationMinutes * 60 {
+                NotificationManager.shared.sendWarningNotification(minutesRemaining: prefs.notificationMinutes)
             }
         }
     }

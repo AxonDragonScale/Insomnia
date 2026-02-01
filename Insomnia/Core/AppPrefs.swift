@@ -20,6 +20,8 @@ final class AppPrefs: ObservableObject {
     private enum Keys {
         static let selectedAppIcon = "selectedAppIcon"
         static let preventManualSleep = "preventManualSleep"
+        static let notificationEnabled = "notificationEnabled"
+        static let notificationMinutes = "notificationMinutes"
     }
 
     // MARK: - Published Properties
@@ -29,6 +31,12 @@ final class AppPrefs: ObservableObject {
 
     /// Whether to prevent manual sleep (Apple menu, power button).
     @AppStorage(Keys.preventManualSleep) var preventManualSleep: Bool = false
+
+    /// Whether to show notification before timer expires.
+    @AppStorage(Keys.notificationEnabled) var notificationEnabled: Bool = true
+
+    /// Minutes before expiry to trigger notification.
+    @AppStorage(Keys.notificationMinutes) var notificationMinutes: Int = 1
 
     // MARK: - Computed Properties
 

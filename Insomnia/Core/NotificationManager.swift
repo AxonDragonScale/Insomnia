@@ -23,7 +23,7 @@ final class NotificationManager: NSObject {
     // MARK: - Notification Identifiers
 
     private enum NotificationIdentifier {
-        static let oneMinuteWarning = "com.insomnia.oneMinuteWarning"
+        static let expiryWarning = "com.insomnia.expiryWarning"
     }
 
     // MARK: - Initialization
@@ -51,16 +51,19 @@ final class NotificationManager: NSObject {
         }
     }
 
-    /// Sends a notification warning that the timer will expire in 1 minute.
-    func sendOneMinuteWarning() {
+    /// Sends a notification warning that the timer will expire soon.
+    /// - Parameter minutesRemaining: The number of minutes remaining before expiry.
+    func sendWarningNotification(minutesRemaining: Int) {
         let content = UNMutableNotificationContent()
         content.title = "Insomnia"
-        content.body = "Sleep prevention will end in 1 minute"
+        content.body = minutesRemaining == 1
+            ? "Sleep prevention will end in 1 minute"
+            : "Sleep prevention will end in \(minutesRemaining) minutes"
         content.sound = UNNotificationSound.default
 
         // Deliver immediately
         let request = UNNotificationRequest(
-            identifier: NotificationIdentifier.oneMinuteWarning,
+            identifier: NotificationIdentifier.expiryWarning,
             content: content,
             trigger: nil
         )
@@ -78,10 +81,10 @@ final class NotificationManager: NSObject {
         notificationCenter.removeAllDeliveredNotifications()
     }
 
-    /// Cancels the one minute warning notification if it's pending.
-    func cancelOneMinuteWarning() {
+    /// Cancels the expiry warning notification if it's pending.
+    func cancelExpiryWarning() {
         notificationCenter.removePendingNotificationRequests(
-            withIdentifiers: [NotificationIdentifier.oneMinuteWarning]
+            withIdentifiers: [NotificationIdentifier.expiryWarning]
         )
     }
 }

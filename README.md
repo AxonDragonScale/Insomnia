@@ -95,6 +95,8 @@ All user settings are centralized in `Core/AppPrefs.swift`:
 |-----|------|---------|-------------|
 | `selectedAppIcon` | String | `moon` | Menu bar and branding icon |
 | `preventManualSleep` | Bool | `false` | Block manual sleep triggers |
+| `notificationEnabled` | Bool | `true` | Show notification before expiry |
+| `notificationMinutes` | Int | `1` | Minutes before expiry to notify (1, 2, 5, 10) |
 
 ---
 

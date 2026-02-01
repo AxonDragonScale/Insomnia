@@ -136,11 +136,38 @@ func createTintedImage(from image: NSImage, tintColor: NSColor) -> NSImage {
     return tintedImage
 }
 
-/// Saves an NSImage as PNG to the specified path
-func savePNG(image: NSImage, to path: String) -> Bool {
-    guard let tiffData = image.tiffRepresentation,
-          let bitmap = NSBitmapImageRep(data: tiffData),
-          let pngData = bitmap.representation(using: .png, properties: [:]) else {
+/// Saves an NSImage as PNG to the specified path with correct pixel dimensions
+func savePNG(image: NSImage, to path: String, pixelSize: Int) -> Bool {
+    // Create a bitmap representation with explicit pixel dimensions
+    guard let bitmap = NSBitmapImageRep(
+        bitmapDataPlanes: nil,
+        pixelsWide: pixelSize,
+        pixelsHigh: pixelSize,
+        bitsPerSample: 8,
+        samplesPerPixel: 4,
+        hasAlpha: true,
+        isPlanar: false,
+        colorSpaceName: .deviceRGB,
+        bytesPerRow: 0,
+        bitsPerPixel: 0
+    ) else {
+        return false
+    }
+
+    // Set the size to match pixels (72 DPI equivalent)
+    bitmap.size = NSSize(width: pixelSize, height: pixelSize)
+
+    // Draw the image into the bitmap
+    NSGraphicsContext.saveGraphicsState()
+    NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: bitmap)
+    image.draw(in: NSRect(x: 0, y: 0, width: pixelSize, height: pixelSize),
+               from: NSRect(origin: .zero, size: image.size),
+               operation: .copy,
+               fraction: 1.0)
+    NSGraphicsContext.restoreGraphicsState()
+
+    // Save as PNG
+    guard let pngData = bitmap.representation(using: .png, properties: [:]) else {
         return false
     }
 
@@ -209,7 +236,7 @@ for (size, scale, filename) in iconSizes {
     let image = createAppIcon(pixelSize: pixelSize)
     let outputPath = outputDir.appendingPathComponent(filename).path
 
-    if savePNG(image: image, to: outputPath) {
+    if savePNG(image: image, to: outputPath, pixelSize: pixelSize) {
         print("✅ Generated: \(filename) (\(pixelSize)x\(pixelSize)px)")
         successCount += 1
     } else {

@@ -216,7 +216,7 @@ private struct AboutSection: View {
     var body: some View {
         VStack(spacing: Spacing.small) {
             VStack(spacing: 4) {
-                HStack(alignment: .center, spacing: 6) {
+                HStack(alignment: .center, spacing: 4) {
                     Text(AppInfo.appName)
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(AppInfo.isDebug ? AppColors.activeGreen : AppColors.emphasizedText)

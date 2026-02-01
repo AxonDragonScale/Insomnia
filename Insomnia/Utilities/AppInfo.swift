@@ -34,7 +34,7 @@ struct AppInfo {
     /// The app's display name (e.g., "Insomnia" or "Insomnia (Debug)")
     static var appName: String {
         let baseName = Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "Insomnia"
-        return isDebug ? "\(baseName) (Debug)" : baseName
+        return isDebug ? "\(baseName) Debug" : baseName
     }
 
     /// The app's base name without debug suffix (e.g., "Insomnia")

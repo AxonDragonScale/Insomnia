@@ -22,8 +22,57 @@ let iconSizes: [(size: Int, scale: Int, filename: String)] = [
     (512, 2, "icon_512x512@2x.png")
 ]
 
-/// Creates the app icon image at the specified pixel size
-func createAppIcon(pixelSize: Int) -> NSImage {
+// MARK: - Icon Theme Configuration
+
+enum IconTheme {
+    case release
+    case debug
+
+    var name: String {
+        switch self {
+        case .release: return "Release"
+        case .debug: return "Debug"
+        }
+    }
+
+    var folderName: String {
+        switch self {
+        case .release: return "AppIcon.appiconset"
+        case .debug: return "AppIconDebug.appiconset"
+        }
+    }
+
+    var gradientColors: [CGColor] {
+        switch self {
+        case .release:
+            // Indigo to purple gradient
+            return [
+                NSColor(red: 0.30, green: 0.20, blue: 0.65, alpha: 0.95).cgColor,
+                NSColor(red: 0.40, green: 0.22, blue: 0.62, alpha: 0.85).cgColor,
+                NSColor(red: 0.50, green: 0.25, blue: 0.58, alpha: 0.75).cgColor
+            ]
+        case .debug:
+            // Orange to yellow gradient
+            return [
+                NSColor(red: 0.85, green: 0.35, blue: 0.10, alpha: 0.95).cgColor,
+                NSColor(red: 0.90, green: 0.45, blue: 0.15, alpha: 0.85).cgColor,
+                NSColor(red: 0.95, green: 0.55, blue: 0.20, alpha: 0.75).cgColor
+            ]
+        }
+    }
+
+    var symbolTintColor: NSColor {
+        switch self {
+        case .release:
+            return NSColor(red: 1.0, green: 0.98, blue: 0.92, alpha: 1.0) // Warm white/cream
+        case .debug:
+            return NSColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0) // Pure white
+        }
+    }
+}
+
+/// Creates the app icon image at the specified pixel size with the given theme
+func createAppIcon(pixelSize: Int, theme: IconTheme) -> NSImage {
     let size = NSSize(width: pixelSize, height: pixelSize)
     let image = NSImage(size: size)
 
@@ -47,16 +96,10 @@ func createAppIcon(pixelSize: Int) -> NSImage {
     backgroundPath.fill()
     context.restoreGState()
 
-    // Gradient overlay (indigo to purple - matching app theme with subtle black blend)
-    let gradientColors = [
-        NSColor(red: 0.30, green: 0.20, blue: 0.65, alpha: 0.95).cgColor,  // Indigo
-        NSColor(red: 0.40, green: 0.22, blue: 0.62, alpha: 0.85).cgColor,  // Mid purple
-        NSColor(red: 0.50, green: 0.25, blue: 0.58, alpha: 0.75).cgColor   // Purple
-    ]
-
+    // Gradient overlay based on theme
     let gradient = CGGradient(
         colorsSpace: CGColorSpaceCreateDeviceRGB(),
-        colors: gradientColors as CFArray,
+        colors: theme.gradientColors as CFArray,
         locations: [0.0, 0.5, 1.0]
     )!
 
@@ -106,8 +149,7 @@ func createAppIcon(pixelSize: Int) -> NSImage {
         shadow.set()
 
         // Create a tinted version of the symbol
-        let tintColor = NSColor(red: 1.0, green: 0.98, blue: 0.92, alpha: 1.0) // Warm white/cream
-        let tintedImage = createTintedImage(from: configuredImage, tintColor: tintColor)
+        let tintedImage = createTintedImage(from: configuredImage, tintColor: theme.symbolTintColor)
 
         tintedImage.draw(in: symbolRect, from: .zero, operation: .sourceOver, fraction: 1.0)
         context.restoreGState()
@@ -206,60 +248,72 @@ func generateContentsJSON() -> String {
     """
 }
 
+/// Generates all icons for a given theme
+func generateIcons(for theme: IconTheme, projectRoot: URL) -> Int {
+    let outputDir = projectRoot
+        .appendingPathComponent("Insomnia")
+        .appendingPathComponent("Assets.xcassets")
+        .appendingPathComponent(theme.folderName)
+
+    print("")
+    print("[\(theme.name) Icon]")
+    print("Output: \(outputDir.path)")
+
+    // Create output directory if needed
+    let fileManager = FileManager.default
+    if !fileManager.fileExists(atPath: outputDir.path) {
+        try? fileManager.createDirectory(at: outputDir, withIntermediateDirectories: true)
+    }
+
+    // Generate icons at all sizes
+    var successCount = 0
+    for (size, scale, filename) in iconSizes {
+        let pixelSize = size * scale
+        let image = createAppIcon(pixelSize: pixelSize, theme: theme)
+        let outputPath = outputDir.appendingPathComponent(filename).path
+
+        if savePNG(image: image, to: outputPath, pixelSize: pixelSize) {
+            print("  ✅ \(filename) (\(pixelSize)x\(pixelSize)px)")
+            successCount += 1
+        } else {
+            print("  ❌ \(filename)")
+        }
+    }
+
+    // Generate Contents.json
+    let contentsPath = outputDir.appendingPathComponent("Contents.json").path
+    let contentsJSON = generateContentsJSON()
+    do {
+        try contentsJSON.write(toFile: contentsPath, atomically: true, encoding: .utf8)
+        print("  ✅ Contents.json")
+    } catch {
+        print("  ❌ Contents.json: \(error)")
+    }
+
+    return successCount
+}
+
 // MARK: - Main Execution
 
 print("🌙 Insomnia App Icon Generator")
 print("==============================")
-print("Using SF Symbol: moon.zzz.fill")
-print("")
+print("SF Symbol: moon.zzz.fill")
 
 // Determine output directory
 let scriptPath = URL(fileURLWithPath: #file)
 let projectRoot = scriptPath.deletingLastPathComponent().deletingLastPathComponent()
-let outputDir = projectRoot
-    .appendingPathComponent("Insomnia")
-    .appendingPathComponent("Assets.xcassets")
-    .appendingPathComponent("AppIcon.appiconset")
 
-print("Output directory: \(outputDir.path)")
-
-// Create output directory if needed
-let fileManager = FileManager.default
-if !fileManager.fileExists(atPath: outputDir.path) {
-    try? fileManager.createDirectory(at: outputDir, withIntermediateDirectories: true)
-}
-
-// Generate icons at all sizes
-var successCount = 0
-for (size, scale, filename) in iconSizes {
-    let pixelSize = size * scale
-    let image = createAppIcon(pixelSize: pixelSize)
-    let outputPath = outputDir.appendingPathComponent(filename).path
-
-    if savePNG(image: image, to: outputPath, pixelSize: pixelSize) {
-        print("✅ Generated: \(filename) (\(pixelSize)x\(pixelSize)px)")
-        successCount += 1
-    } else {
-        print("❌ Failed: \(filename)")
-    }
-}
-
-// Generate Contents.json
-let contentsPath = outputDir.appendingPathComponent("Contents.json").path
-let contentsJSON = generateContentsJSON()
-do {
-    try contentsJSON.write(toFile: contentsPath, atomically: true, encoding: .utf8)
-    print("✅ Generated: Contents.json")
-} catch {
-    print("❌ Failed to write Contents.json: \(error)")
-}
+// Generate both Release and Debug icons
+let releaseCount = generateIcons(for: .release, projectRoot: projectRoot)
+let debugCount = generateIcons(for: .debug, projectRoot: projectRoot)
 
 print("")
 print("==============================")
-print("Generated \(successCount)/\(iconSizes.count) icon sizes")
+print("Release: \(releaseCount)/\(iconSizes.count) icons generated")
+print("Debug:   \(debugCount)/\(iconSizes.count) icons generated")
 print("")
 print("Next steps:")
 print("1. Open Insomnia.xcodeproj in Xcode")
-print("2. Navigate to Assets.xcassets > AppIcon")
-print("3. Verify all icon sizes are populated")
-print("4. Build and run to see the new icon")
+print("2. Navigate to Assets.xcassets")
+print("3. Verify AppIcon and AppIconDebug are populated")
+print("4. Build and run to see the new icons")

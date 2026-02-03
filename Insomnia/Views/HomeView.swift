@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    
+
     @ObservedObject var sleepTimer: SleepTimer
 
     // Local UI state
@@ -25,7 +25,7 @@ struct HomeView: View {
             // --- 1. Main Status Area ---
             StatusDisplayView(
                 isActive: sleepTimer.isActive,
-                secondsRemaining: sleepTimer.secondsRemaining,
+                isIndefinite: sleepTimer.isIndefinite,
                 timeRemainingDisplay: sleepTimer.timeRemainingDisplay
             )
 
@@ -99,7 +99,7 @@ struct HomeView: View {
 
 struct StatusDisplayView: View {
     let isActive: Bool
-    let secondsRemaining: Int
+    let isIndefinite: Bool
     let timeRemainingDisplay: String
 
     var body: some View {
@@ -111,7 +111,7 @@ struct StatusDisplayView: View {
                     .textCase(.uppercase)
 
                 Group {
-                    if secondsRemaining == -1 {
+                    if isIndefinite {
                         Image(systemName: "infinity")
                             .font(.system(size: 48, weight: .light))
                             .foregroundColor(.white)

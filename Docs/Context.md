@@ -16,33 +16,35 @@ macOS menu bar utility that prevents system sleep. Built with SwiftUI, uses IOKi
 
 ```
 Insomnia/
-├── InsomniaApp.swift              # Entry point, MenuBarExtra setup
-├── InsomniaView.swift             # Main container, page navigation
-├── Views/
-│   ├── AppPage.swift              # Navigation enum (.home, .settings)
-│   ├── HomeView.swift             # Timer controls and status
-│   └── SettingsView.swift         # App icon and behavior settings
-├── Components/
-│   ├── AppButton.swift            # Button with icon + title
-│   ├── IconButton.swift           # Icon-only button
-│   ├── BackgroundGradientView.swift
-│   └── BrandingHeaderView.swift   # Header with nav buttons
-├── Core/
-│   ├── AppPrefs.swift             # Centralized @AppStorage preferences
-│   ├── SleepManager.swift         # IOKit power assertions
-│   ├── SleepTimer.swift           # Countdown ViewModel
-│   ├── LaunchAtLoginManager.swift # SMAppService wrapper
-│   └── NotificationManager.swift  # Local notifications
-├── Constants/
-│   ├── AppColors.swift            # Theme colors
-│   ├── AppIcon.swift              # Icon options enum
-│   └── Spacing.swift              # Layout constants
-├── Utilities/
-│   ├── TimeUtil.swift             # Time formatting
-│   └── Image+ActiveBadge.swift    # Menu bar icon with badge
+├── Insomnia/
+│   ├── InsomniaApp.swift              # Entry point, MenuBarExtra setup
+│   ├── InsomniaView.swift             # Main container, page navigation
+│   ├── Views/
+│   │   ├── AppPage.swift              # Navigation enum (.home, .settings)
+│   │   ├── HomeView.swift             # Timer controls and status
+│   │   └── SettingsView.swift         # App icon and behavior settings
+│   ├── Components/
+│   │   ├── AppButton.swift            # Button with icon + title
+│   │   ├── IconButton.swift           # Icon-only button
+│   │   ├── BackgroundGradientView.swift
+│   │   └── BrandingHeaderView.swift   # Header with nav buttons
+│   ├── Core/
+│   │   ├── AppPrefs.swift             # Centralized @AppStorage preferences
+│   │   ├── SleepManager.swift         # IOKit power assertions
+│   │   ├── SleepTimer.swift           # Countdown ViewModel
+│   │   ├── LaunchAtLoginManager.swift # SMAppService wrapper
+│   │   └── NotificationManager.swift  # Local notifications
+│   ├── Constants/
+│   │   ├── AppColors.swift            # Theme colors
+│   │   ├── AppIcon.swift              # Icon options enum
+│   │   └── Spacing.swift              # Layout constants
+│   └── Utilities/
+│       ├── TimeUtil.swift             # Time formatting
+│       └── Image+ActiveBadge.swift    # Menu bar icon with badge
+├── Insomnia.xcodeproj/
 ├── Scripts/
-│   └── build_release.sh           # Distribution build script
-└── Docs/                          # Screenshots and documentation
+│   └── build_release.sh               # Distribution build script
+└── Docs/                              # Screenshots and documentation
 ```
 
 ---
@@ -67,6 +69,24 @@ InsomniaApp (MenuBarExtra)
 | `SleepTimer` | `@MainActor ObservableObject` countdown logic |
 | `LaunchAtLoginManager` | `SMAppService` wrapper for login items |
 | `AppIcon` | Enum with active/inactive icon pairs |
+
+---
+
+## SleepTimer
+
+The timer uses `targetEndDate` as the source of truth and calculates remaining time on each tick. This ensures correctness after system wake from sleep.
+
+**Key Properties:**
+- `isActive` — Whether sleep prevention is active (observed by menu bar icon)
+- `isIndefinite` — Whether running in indefinite mode (no countdown)
+- `timeRemainingDisplay` — Formatted time string for UI
+- `isUiVisible` — Set by view's `onAppear`/`onDisappear` to control updates
+
+**CPU Optimization:**
+`timeRemainingDisplay` is only updated when `isUiVisible == true`. This prevents unnecessary SwiftUI observer notifications when the menu bar popover is closed, reducing idle CPU usage.
+
+**System Wake Handling:**
+Listens to `NSWorkspace.didWakeNotification` to recalculate remaining time after the system wakes from sleep. If the target time has passed while asleep, the timer stops immediately.
 
 ---
 
@@ -96,6 +116,7 @@ InsomniaApp (MenuBarExtra)
 2. **IOKit:** Only in `SleepManager`. Never import in SwiftUI views
 3. **Preferences:** Always use `AppPrefs.shared`, not direct `@AppStorage`
 4. **Timer:** Must add to `RunLoop.main` with `.common` mode (works when menu open)
+5. **CPU:** Only update `@Published` properties when necessary to avoid idle CPU usage
 
 ---
 
@@ -103,15 +124,15 @@ InsomniaApp (MenuBarExtra)
 
 | To Change... | Edit File |
 |--------------|-----------|
-| Menu bar icon | `InsomniaApp.swift` |
-| User preferences | `Core/AppPrefs.swift` |
-| Timer logic | `Core/SleepTimer.swift` |
-| Power assertion | `Core/SleepManager.swift` |
-| Launch at login | `Core/LaunchAtLoginManager.swift` |
-| Home page UI | `Views/HomeView.swift` |
-| Settings UI | `Views/SettingsView.swift` |
-| Available icons | `Constants/AppIcon.swift` |
-| Theme colors | `Constants/AppColors.swift` |
+| Menu bar icon | `Insomnia/InsomniaApp.swift` |
+| User preferences | `Insomnia/Core/AppPrefs.swift` |
+| Timer logic | `Insomnia/Core/SleepTimer.swift` |
+| Power assertion | `Insomnia/Core/SleepManager.swift` |
+| Launch at login | `Insomnia/Core/LaunchAtLoginManager.swift` |
+| Home page UI | `Insomnia/Views/HomeView.swift` |
+| Settings UI | `Insomnia/Views/SettingsView.swift` |
+| Available icons | `Insomnia/Constants/AppIcon.swift` |
+| Theme colors | `Insomnia/Constants/AppColors.swift` |
 
 ---
 
@@ -135,9 +156,11 @@ pmset -g assertions
 ## Testing Checklist
 
 - [ ] Timer counts down correctly
-- [ ] Indefinite mode shows ∞
+- [ ] Timer accounts for time elapsed during system sleep
+- [ ] Indefinite mode shows ∞ and uses no timer
 - [ ] Icon changes between active/inactive states
 - [ ] Settings persist after restart
 - [ ] `pmset -g assertions` shows correct assertion type
 - [ ] Manual sleep blocked when setting enabled
 - [ ] Launch at Login works (System Settings > General > Login Items)
+- [ ] Low CPU usage when menu bar popover is closed

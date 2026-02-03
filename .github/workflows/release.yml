@@ -48,15 +48,6 @@ jobs:
           chmod +x Scripts/build_release.sh
           ./Scripts/build_release.sh "${{ steps.version.outputs.version }}"
 
-      - name: Extract checksums
-        id: checksums
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          DMG_SHA=$(cat "build/$PROJECT_NAME-$VERSION.dmg.sha256" | awk '{print $1}')
-          ZIP_SHA=$(cat "build/$PROJECT_NAME-$VERSION.zip.sha256" | awk '{print $1}')
-          echo "dmg_sha=$DMG_SHA" >> $GITHUB_OUTPUT
-          echo "zip_sha=$ZIP_SHA" >> $GITHUB_OUTPUT
-
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:

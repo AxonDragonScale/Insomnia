@@ -73,19 +73,6 @@ jobs:
             3. First launch: **Right-click → Open → Open** (required for unsigned apps)
 
             See [INSTALL.md](https://github.com/${{ github.repository }}/blob/main/INSTALL.md) for detailed instructions.
-
-            ## Checksums (SHA256)
-
-            | File | SHA256 |
-            |------|--------|
-            | `${{ env.PROJECT_NAME }}-${{ steps.version.outputs.version }}.dmg` | `${{ steps.checksums.outputs.dmg_sha }}` |
-            | `${{ env.PROJECT_NAME }}-${{ steps.version.outputs.version }}.zip` | `${{ steps.checksums.outputs.zip_sha }}` |
-
-            ## Verify Download
-
-            ```bash
-            shasum -a 256 ~/Downloads/${{ env.PROJECT_NAME }}-${{ steps.version.outputs.version }}.dmg
-            ```
           files: |
             build/${{ env.PROJECT_NAME }}-${{ steps.version.outputs.version }}.dmg
             build/${{ env.PROJECT_NAME }}-${{ steps.version.outputs.version }}.zip

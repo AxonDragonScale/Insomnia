@@ -46,8 +46,8 @@ struct InsomniaView: View {
             }
         }
         .frame(width: AppDimensions.windowWidth)
-        .onAppear { sleepTimer.onUiAppear() }
-        .onDisappear { sleepTimer.onUiDisappear() }
+        .onAppear { sleepTimer.isUiVisible = true }
+        .onDisappear { sleepTimer.isUiVisible = false }
     }
 }
 

@@ -94,11 +94,14 @@ final class SleepTimer: ObservableObject {
         persistState()
     }
 
-    func stop() {
+    func stop(cancelNotifications: Bool = true) {
         timer?.invalidate()
         timer = nil
         SleepManager.shared.allowSleep()
-        NotificationManager.shared.cancelAllNotifications()
+
+        if cancelNotifications {
+            NotificationManager.shared.cancelAllNotifications()
+        }
 
         isActive = false
         isIndefinite = false
@@ -143,7 +146,7 @@ final class SleepTimer: ObservableObject {
 
         if remaining <= 0 {
             NotificationManager.shared.sendCompletionNotification()
-            stop()
+            stop(cancelNotifications: false)
             return
         }
 

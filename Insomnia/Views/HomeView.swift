@@ -145,6 +145,7 @@ struct StatusDisplayView: View {
 struct CustomTimeInputView: View {
     @Binding var showCustomTime: Bool
     @Binding var customMinutes: String
+    @FocusState var isFocused: Bool
     let onStart: (Int) -> Void
 
     var body: some View {
@@ -158,6 +159,7 @@ struct CustomTimeInputView: View {
                             .font(.system(size: 14))
                             .foregroundColor(.white)
                             .frame(width: 60)
+                            .focused($isFocused)
                     }
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -182,6 +184,7 @@ struct CustomTimeInputView: View {
             } else {
                 AppButton(icon: "timer", title: "Custom Time") {
                     showCustomTime = true
+                    isFocused = true
                 }
                 .padding(.horizontal)
             }
@@ -194,6 +197,7 @@ struct CustomTimeInputView: View {
 struct UntilTimeInputView: View {
     @Binding var showUntilTime: Bool
     @Binding var targetTime: Date
+    @FocusState var isFocused: Bool
     let onStart: (Date) -> Void
 
     @State private var timeText: String = ""
@@ -212,6 +216,7 @@ struct UntilTimeInputView: View {
                             .font(.system(size: 14, design: .monospaced))
                             .foregroundColor(.white)
                             .fixedSize()
+                            .focused($isFocused)
                     }
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -237,6 +242,7 @@ struct UntilTimeInputView: View {
                 AppButton(icon: "clock.badge.checkmark", title: "Until Time") {
                     timeText = TimeInputUtil.oneHourFromNow()
                     showUntilTime = true
+                    isFocused = true
                 }
                 .padding(.horizontal)
                 .padding(.top, Spacing.small)

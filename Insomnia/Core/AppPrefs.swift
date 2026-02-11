@@ -33,7 +33,7 @@ final class AppPrefs: ObservableObject {
     // MARK: - User Preferences
 
     /// The selected app icon for menu bar and branding.
-    @AppStorage(Keys.selectedAppIcon) var selectedAppIconRaw: String = AppIcon.defaultIcon.rawValue
+    @AppStorage(Keys.selectedAppIcon) var selectedAppIcon: AppIcon = .defaultIcon
 
     /// Whether to prevent manual sleep (Apple menu, power button).
     @AppStorage(Keys.preventManualSleep) var preventManualSleep: Bool = false
@@ -58,14 +58,6 @@ final class AppPrefs: ObservableObject {
 
     /// The target end date of the persisted timer (seconds since 1970). Zero means no date.
     @AppStorage(Keys.timerTargetEndDate) var timerTargetEndDate: Double = 0
-
-    // MARK: - Computed Properties
-
-    /// The selected app icon as an `AppIcon` enum value.
-    var selectedAppIcon: AppIcon {
-        get { AppIcon.from(selectedAppIconRaw) }
-        set { selectedAppIconRaw = newValue.rawValue }
-    }
 
     // MARK: - Initialization
 

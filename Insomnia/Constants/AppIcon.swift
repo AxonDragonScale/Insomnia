@@ -63,8 +63,5 @@ enum AppIcon: String, CaseIterable, Identifiable {
     /// The default app icon.
     static let defaultIcon: AppIcon = .moon
 
-    /// Creates an AppIcon from a raw value string, returning the default icon if invalid.
-    static func from(_ rawValue: String) -> AppIcon {
-        AppIcon(rawValue: rawValue) ?? .defaultIcon
-    }
+
 }

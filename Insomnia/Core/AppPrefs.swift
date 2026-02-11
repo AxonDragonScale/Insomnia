@@ -23,9 +23,14 @@ final class AppPrefs: ObservableObject {
         static let notificationEnabled = "notificationEnabled"
         static let notificationMinutes = "notificationMinutes"
         static let isFirstLaunch = "isFirstLaunch"
+
+        // Timer state persistence
+        static let timerIsActive = "timerIsActive"
+        static let timerIsIndefinite = "timerIsIndefinite"
+        static let timerTargetEndDate = "timerTargetEndDate"
     }
 
-    // MARK: - Published Properties
+    // MARK: - User Preferences
 
     /// The selected app icon for menu bar and branding.
     @AppStorage(Keys.selectedAppIcon) var selectedAppIconRaw: String = AppIcon.defaultIcon.rawValue
@@ -41,6 +46,18 @@ final class AppPrefs: ObservableObject {
 
     /// Whether this is the first launch of the app. Used for first-launch setup.
     @AppStorage(Keys.isFirstLaunch) var isFirstLaunch: Bool = true
+
+    // MARK: - Timer State (internal, not user-facing)
+    // Persisted so active timers survive app restarts and crashes.
+
+    /// Whether a timer was active when the app last ran.
+    @AppStorage(Keys.timerIsActive) var timerIsActive: Bool = false
+
+    /// Whether the persisted timer was in indefinite mode.
+    @AppStorage(Keys.timerIsIndefinite) var timerIsIndefinite: Bool = false
+
+    /// The target end date of the persisted timer (seconds since 1970). Zero means no date.
+    @AppStorage(Keys.timerTargetEndDate) var timerTargetEndDate: Double = 0
 
     // MARK: - Computed Properties
 

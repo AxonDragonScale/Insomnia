@@ -81,12 +81,24 @@ The timer uses `targetEndDate` as the source of truth and calculates remaining t
 - `isIndefinite` — Whether running in indefinite mode (no countdown)
 - `timeRemainingDisplay` — Formatted time string for UI
 - `isUiVisible` — Set by view's `onAppear`/`onDisappear` to control updates
+- `notificationSent` — Guard flag to prevent duplicate expiry notifications
 
 **CPU Optimization:**
 `timeRemainingDisplay` is only updated when `isUiVisible == true`. This prevents unnecessary SwiftUI observer notifications when the menu bar popover is closed, reducing idle CPU usage.
 
+**State Persistence:**
+Timer state (`isActive`, `isIndefinite`, `targetEndDate`) is persisted to `AppPrefs` on every `start()` and cleared on every `stop()`. On initialization, `restoreState()` checks for a previously active timer:
+- **Indefinite:** Re-creates the IOKit assertion and resumes indefinite mode.
+- **Timed (still valid):** Re-creates the assertion and resumes countdown from the persisted `targetEndDate`.
+- **Timed (expired):** Silently clears persisted state — the timer naturally ran out while the app was not running.
+
+This ensures sleep prevention survives app restarts, crashes, and force-quits.
+
 **System Wake Handling:**
 Listens to `NSWorkspace.didWakeNotification` to recalculate remaining time after the system wakes from sleep. If the target time has passed while asleep, the timer stops immediately.
+
+**Notification Guard:**
+The expiry notification uses a range check (`remaining <= threshold`) with a `notificationSent` flag instead of exact-second matching. This prevents missed notifications from timer jitter and duplicate deliveries.
 
 ---
 
@@ -98,6 +110,16 @@ Listens to `NSWorkspace.didWakeNotification` to recalculate remaining time after
 | `preventManualSleep` | Bool | `false` | Block manual sleep triggers |
 | `notificationEnabled` | Bool | `true` | Show notification before expiry |
 | `notificationMinutes` | Int | `1` | Minutes before expiry to notify |
+
+### Timer State (internal, not user-facing)
+
+Persisted so active timers survive app restarts and crashes.
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `timerIsActive` | Bool | `false` | Whether a timer was active when the app last ran |
+| `timerIsIndefinite` | Bool | `false` | Whether the persisted timer was indefinite |
+| `timerTargetEndDate` | Double | `0` | Target end date (seconds since 1970) |
 
 ---
 

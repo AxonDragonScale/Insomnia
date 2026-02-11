@@ -9,11 +9,15 @@ import Foundation
 import AppKit
 
 /// ViewModel that manages the countdown timer and coordinates with SleepManager.
+///
+/// Timer state is persisted to `AppPrefs` so active timers survive app restarts
+/// and crashes. On initialization, any previously active timer is restored — if its
+/// target time has already passed, the timer stops silently.
 @MainActor
 final class SleepTimer: ObservableObject {
 
     // MARK: - Published Properties
-    
+
     @Published private(set) var isActive: Bool = false
     @Published private(set) var isIndefinite: Bool = false
     @Published private(set) var timeRemainingDisplay: String = "00:00"  // Must only be updated when UI is visible to avoid high idle CPU usage
@@ -23,9 +27,10 @@ final class SleepTimer: ObservableObject {
     private var timer: Timer?
     private var targetEndDate: Date?
     private var wakeObserver: NSObjectProtocol?
-    
+    private var notificationSent: Bool = false
+
     // MARK: - Public Properties
-    
+
     var isUiVisible: Bool = false {
         didSet {
             if isUiVisible { updateRemainingTime() }
@@ -42,6 +47,8 @@ final class SleepTimer: ObservableObject {
         ) { [weak self] _ in
             Task { @MainActor in self?.updateRemainingTime() }
         }
+
+        restoreState()
     }
 
     deinit {
@@ -67,6 +74,7 @@ final class SleepTimer: ObservableObject {
         }
 
         isActive = true
+        notificationSent = false
 
         if minutes == -1 {
             isIndefinite = true
@@ -78,6 +86,8 @@ final class SleepTimer: ObservableObject {
             updateRemainingTime()
             startTimer()
         }
+
+        persistState()
     }
 
     func stop() {
@@ -90,9 +100,12 @@ final class SleepTimer: ObservableObject {
         isIndefinite = false
         targetEndDate = nil
         timeRemainingDisplay = "00:00"
+        notificationSent = false
+
+        clearPersistedState()
     }
 
-    // MARK: - Private Methods
+    // MARK: - Timer
 
     private func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
@@ -112,10 +125,68 @@ final class SleepTimer: ObservableObject {
             timeRemainingDisplay = remaining.formattedAsTime
         }
 
-        // Send warning notification if enabled
-        let prefs = AppPrefs.shared
-        if prefs.notificationEnabled && remaining == prefs.notificationMinutes * 60 {
-            NotificationManager.shared.sendWarningNotification(minutesRemaining: prefs.notificationMinutes)
+        // Send warning notification if enabled (with guard to prevent duplicates)
+        if AppPrefs.shared.notificationEnabled
+            && !notificationSent
+            && remaining <= AppPrefs.shared.notificationMinutes * 60 {
+            notificationSent = true
+            NotificationManager.shared.sendWarningNotification(minutesRemaining: AppPrefs.shared.notificationMinutes)
+        }
+    }
+
+    // MARK: - State Persistence
+
+    /// Saves the current timer state to `AppPrefs` so it can be restored on next launch.
+    private func persistState() {
+        AppPrefs.shared.timerIsActive = isActive
+        AppPrefs.shared.timerIsIndefinite = isIndefinite
+        AppPrefs.shared.timerTargetEndDate = targetEndDate?.timeIntervalSince1970 ?? 0
+    }
+
+    /// Clears any persisted timer state.
+    private func clearPersistedState() {
+        AppPrefs.shared.timerIsActive = false
+        AppPrefs.shared.timerIsIndefinite = false
+        AppPrefs.shared.timerTargetEndDate = 0
+    }
+
+    /// Restores a previously active timer from persisted state.
+    ///
+    /// Called once during `init()`. If the persisted timer was timed and has already
+    /// expired, the state is silently cleared. If still valid, the IOKit assertion is
+    /// re-created and the countdown resumes from where it left off.
+    private func restoreState() {
+        guard AppPrefs.shared.timerIsActive else { return }
+
+        // Re-create the IOKit power assertion
+        guard SleepManager.shared.preventSleep(preventManualSleep: AppPrefs.shared.preventManualSleep) else {
+            clearPersistedState()
+            return
+        }
+
+        isActive = true
+
+        if AppPrefs.shared.timerIsIndefinite {
+            isIndefinite = true
+            targetEndDate = nil
+            timeRemainingDisplay = "∞"
+        } else {
+            let endDate = Date(timeIntervalSince1970: AppPrefs.shared.timerTargetEndDate)
+            let remaining = Int(endDate.timeIntervalSince(Date()))
+
+            if remaining <= 0 {
+                // Timer expired while app was not running — clean up
+                SleepManager.shared.allowSleep()
+                isActive = false
+                clearPersistedState()
+                return
+            }
+
+            isIndefinite = false
+            targetEndDate = endDate
+            notificationSent = false
+            updateRemainingTime()
+            startTimer()
         }
     }
 }

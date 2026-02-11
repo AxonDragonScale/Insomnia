@@ -29,11 +29,18 @@ final class SleepTimer: ObservableObject {
     private var wakeObserver: NSObjectProtocol?
     private var notificationSent: Bool = false
 
+    /// Timer tick intervals — 1s for smooth UI countdown, 30s for background expiry checks.
+    private enum TickInterval {
+        static let foreground: TimeInterval = 1.0
+        static let background: TimeInterval = 10.0
+    }
+
     // MARK: - Public Properties
 
     var isUiVisible: Bool = false {
         didSet {
             if isUiVisible { updateRemainingTime() }
+            rescheduleTimerIfNeeded()
         }
     }
 
@@ -117,10 +124,19 @@ final class SleepTimer: ObservableObject {
     // MARK: - Timer
 
     private func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        let interval = isUiVisible ? TickInterval.foreground : TickInterval.background
+        timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.updateRemainingTime() }
         }
         RunLoop.main.add(timer!, forMode: .common)
+    }
+
+    /// Restarts the timer with the appropriate interval when UI visibility changes.
+    private func rescheduleTimerIfNeeded() {
+        guard isActive, !isIndefinite, timer != nil else { return }
+        timer?.invalidate()
+        timer = nil
+        startTimer()
     }
 
     private func updateRemainingTime() {

@@ -84,7 +84,7 @@ The timer uses `targetEndDate` as the source of truth and calculates remaining t
 - `notificationSent` — Guard flag to prevent duplicate expiry notifications
 
 **CPU Optimization:**
-`timeRemainingDisplay` is only updated when `isUiVisible == true`. This prevents unnecessary SwiftUI observer notifications when the menu bar popover is closed, reducing idle CPU usage.
+`timeRemainingDisplay` is only updated when `isUiVisible == true`. This prevents unnecessary SwiftUI observer notifications when the menu bar popover is closed, reducing idle CPU usage. The timer tick interval is also adaptive — **1 second** when the popover is open (smooth countdown display) and **10 seconds** when closed (just enough to catch expiry and notification triggers). The timer is rescheduled automatically via `rescheduleTimerIfNeeded()` whenever `isUiVisible` changes. The IOKit assertion keeps the system awake regardless of tick rate.
 
 **State Persistence:**
 Timer state (`isActive`, `isIndefinite`, `targetEndDate`) is persisted to `AppPrefs` on every `start()` and cleared on every `stop()`. On initialization, `restoreState()` checks for a previously active timer:

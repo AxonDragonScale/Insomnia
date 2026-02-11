@@ -141,7 +141,11 @@ final class SleepTimer: ObservableObject {
 
         let remaining = Int(targetEndDate.timeIntervalSince(Date()))
 
-        if remaining <= 0 { stop(); return }
+        if remaining <= 0 {
+            NotificationManager.shared.sendCompletionNotification()
+            stop()
+            return
+        }
 
         if isUiVisible {
             timeRemainingDisplay = remaining.formattedAsTime

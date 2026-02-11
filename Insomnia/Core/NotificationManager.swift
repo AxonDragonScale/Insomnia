@@ -22,8 +22,9 @@ final class NotificationManager: NSObject {
 
     // MARK: - Notification Identifiers
 
-    private enum NotificationIdentifier {
+    private enum Identifier {
         static let expiryWarning = "com.insomnia.expiryWarning"
+        static let timerCompleted = "com.insomnia.timerCompleted"
     }
 
     // MARK: - Initialization
@@ -61,21 +62,40 @@ final class NotificationManager: NSObject {
             : "Sleep prevention will end in \(minutesRemaining) minutes"
         content.sound = UNNotificationSound.default
 
-        // Deliver immediately
         let request = UNNotificationRequest(
-            identifier: NotificationIdentifier.expiryWarning,
+            identifier: Identifier.expiryWarning,
             content: content,
             trigger: nil
         )
 
         notificationCenter.add(request) { error in
             if let error = error {
-                print("Failed to schedule notification: \(error.localizedDescription)")
+                print("Failed to schedule warning notification: \(error.localizedDescription)")
             }
         }
     }
 
-    /// Cancels all pending notifications.
+    /// Sends a notification that the timer has completed and sleep prevention has ended.
+    func sendCompletionNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "Insomnia"
+        content.body = "Sleep prevention has ended"
+        content.sound = UNNotificationSound.default
+
+        let request = UNNotificationRequest(
+            identifier: Identifier.timerCompleted,
+            content: content,
+            trigger: nil
+        )
+
+        notificationCenter.add(request) { error in
+            if let error = error {
+                print("Failed to schedule completion notification: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    /// Cancels all pending and delivered notifications.
     func cancelAllNotifications() {
         notificationCenter.removeAllPendingNotificationRequests()
         notificationCenter.removeAllDeliveredNotifications()
@@ -84,7 +104,7 @@ final class NotificationManager: NSObject {
     /// Cancels the expiry warning notification if it's pending.
     func cancelExpiryWarning() {
         notificationCenter.removePendingNotificationRequests(
-            withIdentifiers: [NotificationIdentifier.expiryWarning]
+            withIdentifiers: [Identifier.expiryWarning]
         )
     }
 }
@@ -99,7 +119,6 @@ extension NotificationManager: UNUserNotificationCenterDelegate {
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        // Show banner and play sound even when app is in foreground
         completionHandler([.banner, .sound])
     }
 

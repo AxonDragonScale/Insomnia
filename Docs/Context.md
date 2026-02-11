@@ -100,8 +100,10 @@ Listens to `NSWorkspace.didWakeNotification` via a Combine publisher (stored in 
 **Live Preference Detection:**
 `SettingsView` calls `sleepTimer.handlePreventManualSleepChanged(_:)` via an `onChange` modifier when the user toggles `preventManualSleep`. If a timer is active, `SleepManager.preventSleep()` is called immediately with the new value — swapping the IOKit assertion type (idle-only ↔ system-wide) without interrupting the running timer.
 
-**Notification Guard:**
-The expiry notification uses a range check (`remaining <= threshold`) with a `notificationSent` flag instead of exact-second matching. This prevents missed notifications from timer jitter and duplicate deliveries.
+**Notifications:**
+The expiry warning uses a range check (`remaining <= threshold`) with a `notificationSent` flag instead of exact-second matching. This prevents missed notifications from timer jitter and duplicate deliveries. Two types of notifications are sent:
+- **Expiry Warning:** Sent X minutes before timer expires (configurable in settings).
+- **Timer Completed:** Sent when timer naturally expires, informing the user that sleep prevention has ended.
 
 ---
 

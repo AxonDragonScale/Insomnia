@@ -105,6 +105,15 @@ final class SleepTimer: ObservableObject {
         clearPersistedState()
     }
 
+    // MARK: - Preference Change Handling
+
+    /// Call when `preventManualSleep` is toggled in settings.
+    /// If a timer is active, swaps the IOKit assertion type immediately.
+    func handlePreventManualSleepChanged(_ preventManualSleep: Bool) {
+        guard isActive else { return }
+        SleepManager.shared.preventSleep(preventManualSleep: preventManualSleep)
+    }
+
     // MARK: - Timer
 
     private func startTimer() {

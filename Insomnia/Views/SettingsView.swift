@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
 
+    @ObservedObject var sleepTimer: SleepTimer
     @ObservedObject private var prefs = AppPrefs.shared
     @ObservedObject private var launchManager = LaunchAtLoginManager.shared
 
@@ -45,6 +46,9 @@ struct SettingsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .onAppear {
             launchManager.refreshStatus()
+        }
+        .onChange(of: prefs.preventManualSleep) { _, newValue in
+            sleepTimer.handlePreventManualSleepChanged(newValue)
         }
     }
 }
@@ -284,7 +288,7 @@ private struct IconOption: View {
 #Preview {
     ZStack {
         BackgroundGradientView()
-        SettingsView()
+        SettingsView(sleepTimer: SleepTimer())
     }
     .frame(
         width: AppDimensions.windowWidth,

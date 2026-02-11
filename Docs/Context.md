@@ -97,6 +97,9 @@ This ensures sleep prevention survives app restarts, crashes, and force-quits.
 **System Wake Handling:**
 Listens to `NSWorkspace.didWakeNotification` to recalculate remaining time after the system wakes from sleep. If the target time has passed while asleep, the timer stops immediately.
 
+**Live Preference Detection:**
+`SettingsView` calls `sleepTimer.handlePreventManualSleepChanged(_:)` via an `onChange` modifier when the user toggles `preventManualSleep`. If a timer is active, `SleepManager.preventSleep()` is called immediately with the new value — swapping the IOKit assertion type (idle-only ↔ system-wide) without interrupting the running timer.
+
 **Notification Guard:**
 The expiry notification uses a range check (`remaining <= threshold`) with a `notificationSent` flag instead of exact-second matching. This prevents missed notifications from timer jitter and duplicate deliveries.
 

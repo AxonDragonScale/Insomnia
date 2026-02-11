@@ -38,7 +38,7 @@ struct InsomniaView: View {
                     case .home:
                         HomeView(sleepTimer: sleepTimer)
                     case .settings:
-                        SettingsView()
+                        SettingsView(sleepTimer: sleepTimer)
                     }
                 }
                 .frame(height: AppDimensions.windowHeight)
@@ -46,7 +46,7 @@ struct InsomniaView: View {
             }
         }
         .frame(width: AppDimensions.windowWidth)
-        .onAppear { 
+        .onAppear {
             sleepTimer.isUiVisible = true
         }
         .onDisappear {

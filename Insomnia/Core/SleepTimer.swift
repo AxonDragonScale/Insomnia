@@ -7,6 +7,7 @@
 
 import Foundation
 import AppKit
+import Combine
 
 /// ViewModel that manages the countdown timer and coordinates with SleepManager.
 ///
@@ -26,7 +27,7 @@ final class SleepTimer: ObservableObject {
 
     private var timer: Timer?
     private var targetEndDate: Date?
-    private var wakeObserver: NSObjectProtocol?
+    private var cancellables = Set<AnyCancellable>()
     private var notificationSent: Bool = false
 
     /// Timer tick intervals — 1s for smooth UI countdown, 30s for background expiry checks.
@@ -47,22 +48,18 @@ final class SleepTimer: ObservableObject {
     // MARK: - Initialization
 
     init() {
-        wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(
-            forName: NSWorkspace.didWakeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor in self?.updateRemainingTime() }
-        }
+        NSWorkspace.shared.notificationCenter
+            .publisher(for: NSWorkspace.didWakeNotification)
+            .sink { [weak self] _ in
+                Task { @MainActor in self?.updateRemainingTime() }
+            }
+            .store(in: &cancellables)
 
         restoreState()
     }
 
     deinit {
         timer?.invalidate()
-        if let observer = wakeObserver {
-            NSWorkspace.shared.notificationCenter.removeObserver(observer)
-        }
     }
 
     // MARK: - Public Methods

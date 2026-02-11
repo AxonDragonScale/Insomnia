@@ -95,7 +95,7 @@ Timer state (`isActive`, `isIndefinite`, `targetEndDate`) is persisted to `AppPr
 This ensures sleep prevention survives app restarts, crashes, and force-quits.
 
 **System Wake Handling:**
-Listens to `NSWorkspace.didWakeNotification` to recalculate remaining time after the system wakes from sleep. If the target time has passed while asleep, the timer stops immediately.
+Listens to `NSWorkspace.didWakeNotification` via a Combine publisher (stored in `cancellables`) to recalculate remaining time after the system wakes from sleep. If the target time has passed while asleep, the timer stops immediately. The `AnyCancellable` is automatically cleaned up on deallocation — no manual `removeObserver` needed.
 
 **Live Preference Detection:**
 `SettingsView` calls `sleepTimer.handlePreventManualSleepChanged(_:)` via an `onChange` modifier when the user toggles `preventManualSleep`. If a timer is active, `SleepManager.preventSleep()` is called immediately with the new value — swapping the IOKit assertion type (idle-only ↔ system-wide) without interrupting the running timer.

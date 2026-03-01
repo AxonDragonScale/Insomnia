@@ -145,50 +145,41 @@ struct StatusDisplayView: View {
 struct CustomTimeInputView: View {
     @Binding var showCustomTime: Bool
     @Binding var customMinutes: String
-    @FocusState var isFocused: Bool
     let onStart: (Int) -> Void
 
     var body: some View {
-        Group {
-            if showCustomTime {
-                HStack(spacing: Spacing.small) {
-                    HStack {
-                        Image(systemName: "timer")
-                        TextField("Minutes", text: $customMinutes)
-                            .textFieldStyle(.plain)
-                            .font(.system(size: 14))
-                            .foregroundColor(.white)
-                            .frame(width: 60)
-                            .focused($isFocused)
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.small)
-                    .background(AppColors.backgroundOverlay)
-                    .cornerRadius(AppDimensions.cornerRadius)
-
-                    IconButton(icon: "checkmark", style: .confirm) {
-                        if let mins = Int(customMinutes), mins > 0 {
-                            onStart(mins)
-                            showCustomTime = false
-                            customMinutes = ""
-                        }
-                    }
-
-                    IconButton(icon: "xmark", style: .destructive) {
-                        showCustomTime = false
-                        customMinutes = ""
-                    }
+        TimePickerView(
+            collapsedIcon: "timer",
+            collapsedTitle: "Custom Time",
+            fieldIcon: "timer",
+            fieldPlaceholder: "Minutes",
+            fieldText: $customMinutes,
+            fieldFont: .system(size: 14),
+            onFieldChange: { _, new in
+                let digits = new.filter(\.isNumber)
+                let clamped = Int(digits).map { min($0, 999) }
+                return clamped.map { "\($0)" } ?? digits
+            },
+            stepperDeltas: [-30, -15, -5, +5, +15, +30],
+            separatorAfterDelta: -5,
+            onStepper: { delta in
+                let current = Int(customMinutes) ?? 0
+                let updated = max(1, min(999, current + delta))
+                customMinutes = "\(updated)"
+            },
+            onConfirm: {
+                if let mins = Int(customMinutes), mins > 0 {
+                    onStart(mins)
+                    showCustomTime = false
+                    customMinutes = ""
                 }
-                .padding(.horizontal)
-            } else {
-                AppButton(icon: "timer", title: "Custom Time") {
-                    showCustomTime = true
-                    isFocused = true
-                }
-                .padding(.horizontal)
-            }
-        }
+            },
+            onCancel: {
+                showCustomTime = false
+                customMinutes = ""
+            },
+            isExpanded: $showCustomTime
+        )
     }
 }
 
@@ -197,57 +188,45 @@ struct CustomTimeInputView: View {
 struct UntilTimeInputView: View {
     @Binding var showUntilTime: Bool
     @Binding var targetTime: Date
-    @FocusState var isFocused: Bool
     let onStart: (Date) -> Void
 
     @State private var timeText: String = ""
 
     var body: some View {
-        Group {
-            if showUntilTime {
-                HStack(spacing: Spacing.small) {
-                    HStack {
-                        Image(systemName: "clock.badge.checkmark")
-                        TextField("HH:MM AM", text: $timeText)
-                            .onChange(of: timeText) { old, new in
-                                timeText = TimeInputUtil.validateTimeInput(oldValue: old, newValue: new)
-                            }
-                            .textFieldStyle(.plain)
-                            .font(.system(size: 14, design: .monospaced))
-                            .foregroundColor(.white)
-                            .fixedSize()
-                            .focused($isFocused)
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Spacing.small)
-                    .background(AppColors.backgroundOverlay)
-                    .cornerRadius(AppDimensions.cornerRadius)
-
-                    IconButton(icon: "checkmark", style: .confirm) {
-                        if let parsedTime = TimeInputUtil.parseTime(from: timeText) {
-                            onStart(parsedTime)
-                            showUntilTime = false
-                        }
-                    }
-
-                    IconButton(icon: "xmark", style: .destructive) {
-                        showUntilTime = false
-                        timeText = ""
-                    }
+        TimePickerView(
+            collapsedIcon: "clock.badge.checkmark",
+            collapsedTitle: "Until Time",
+            fieldIcon: "clock.badge.checkmark",
+            fieldPlaceholder: "HH:MM AM",
+            fieldText: $timeText,
+            fieldFont: .system(size: 14, design: .monospaced),
+            onFieldChange: { old, new in
+                TimeInputUtil.validateTimeInput(oldValue: old, newValue: new)
+            },
+            stepperDeltas: [-60, -30, -15, +15, +30, +60],
+            separatorAfterDelta: -15,
+            onStepper: { delta in
+                let base = TimeInputUtil.parseTime(from: timeText) ?? Date().addingTimeInterval(3600)
+                let shifted = base.addingTimeInterval(Double(delta) * 60)
+                let earliest = Date().addingTimeInterval(60)
+                timeText = TimeInputUtil.formatTime(from: max(shifted, earliest))
+            },
+            onConfirm: {
+                if let parsedTime = TimeInputUtil.parseTime(from: timeText) {
+                    onStart(parsedTime)
+                    showUntilTime = false
                 }
-                .padding(.horizontal)
-                .padding(.top, Spacing.small)
-            } else {
-                AppButton(icon: "clock.badge.checkmark", title: "Until Time") {
-                    timeText = TimeInputUtil.oneHourFromNow()
-                    showUntilTime = true
-                    isFocused = true
-                }
-                .padding(.horizontal)
-                .padding(.top, Spacing.small)
+            },
+            onCancel: {
+                showUntilTime = false
+                timeText = ""
+            },
+            isExpanded: $showUntilTime,
+            onExpand: {
+                timeText = TimeInputUtil.oneHourFromNow()
             }
-        }
+        )
+        .padding(.top, Spacing.small)
     }
 }
 

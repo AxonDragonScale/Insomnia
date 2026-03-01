@@ -35,7 +35,9 @@ enum AppColors {
     static let activeGreen = Color.green
 
     /// Confirmation button color
-    static let confirmGreen = Color.green.opacity(0.7)
+    static let confirmGreen = Color.green
+    
+    static let rejectRed = Color.red
 
     // MARK: - Gradient Colors
 

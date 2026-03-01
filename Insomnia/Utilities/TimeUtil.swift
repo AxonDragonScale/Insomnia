@@ -132,16 +132,20 @@ struct TimeInputUtil {
         return targetDate
     }
 
-    /// Returns a formatted time string for one hour from now.
+    /// Formats a Date into a time string in HH:MM AM/PM format.
+    /// - Parameter date: The date to format
     /// - Returns: Time string in "HH:MM AM" format
-    static func oneHourFromNow() -> String {
-        let calendar = Calendar.current
-        let oneHourLater = calendar.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
-
+    static func formatTime(from date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "hh:mm a"
         formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter.string(from: date).uppercased()
+    }
 
-        return formatter.string(from: oneHourLater).uppercased()
+    /// Returns a formatted time string for one hour from now.
+    /// - Returns: Time string in "HH:MM AM" format
+    static func oneHourFromNow() -> String {
+        let oneHourLater = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
+        return formatTime(from: oneHourLater)
     }
 }
